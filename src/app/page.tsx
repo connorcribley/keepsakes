@@ -1,9 +1,7 @@
-import Image from "next/image";
+import Map from "@/components/Map";
 
-export default function Home() {
-  return (
-    <div className="">
-      Hello World
-    </div>
-  );
+const Home = () => {
+  return <Map />
 }
+
+export default Home;

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, MapPinned, List } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,19 +11,29 @@ const Navbar = () => {
   return (
     <nav className="sticky relative top-0 bg-black text-white px-6 py-2 shadow-md z-50">
       <div className="flex justify-between items-center">
+
         {/* Left: Logo and Menu */}
-        <div className="flex items-center space-x-4">
-          <Link href="/">
-            <Image
-              src="/keepsakes_logo.svg"
-              alt="Logo"
-              width={50}
-              height={50}
-              className="cursor-pointer"
-            />
+        <Link href="/" className="flex items-center space-x-3 hover:text-orange-400">
+          <Image
+            src="/keepsakes_logo.svg"
+            alt="Logo"
+            width={50}
+            height={50}
+            className="cursor-pointer"
+          />
+          <span className="text-xl font-bold hidden md:inline">Keepsakes</span>
+        </Link>
+
+        {/* Center: Listings / Map */}
+        <div className="flex-grow flex justify-center items-center space-x-3">
+          <Link href="/index" className="flex items-center space-x-1 hover:text-orange-400 transition">
+            <List size={24} />
+            <span className="hidden md:inline">Listings</span>
           </Link>
-          <Link href="/index" className="hover:text-orange-400 transition hidden md:block">
-            Menu
+          <span className="text-gray-500">/</span>
+          <Link href="/map" className="flex items-center space-x-1 hover:text-orange-400 transition">
+            <MapPinned size={24} />
+            <span className="hidden md:inline">Map</span>
           </Link>
         </div>
 
@@ -45,7 +55,7 @@ const Navbar = () => {
         >
           {isOpen ?
             <X size={24} /> :
-            <div className="rounded border border-gray-300 p-1">
+            <div className="rounded border border-gray-300 hover:text-orange-400 hover:border-orange-400 p-1">
               <Menu size={24} />
             </div>
           }

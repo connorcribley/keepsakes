@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import citiesGeoJSON from "../../testdata/cities";
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
@@ -11,11 +12,12 @@ const Map = () => {
     const mapRef = useRef<mapboxgl.Map | null>(null)
 
     useEffect(() => {
-        if (!mapContainerRef.current || mapRef.current) return;
+        const container = mapContainerRef.current;
+        if (!container || mapRef.current) return;
 
         // Initialize the map
         const map = new mapboxgl.Map({
-            container: mapContainerRef.current,
+            container: container,
             style: 'mapbox://styles/mapbox/streets-v11',
             center: [-98.5795, 39.8283],
             zoom: 3,
@@ -44,7 +46,6 @@ const Map = () => {
 
 
         map.on('click', 'city-points', (e) => {
-            console.log('City clicked!');
 
             const feature = e.features && e.features[0] as mapboxgl.GeoJSONFeature;
             if (!feature || feature.geometry.type !== 'Point') return;
@@ -56,7 +57,7 @@ const Map = () => {
                 new mapboxgl.Popup({
                     closeOnClick: true,
                     offset: 15,
-                    anchor: 'top',
+                    anchor: 'bottom',
                     closeButton: false
                 })
                     .setLngLat(coordinates)
@@ -73,8 +74,11 @@ const Map = () => {
             map.getCanvas().style.cursor = '';
         });
 
-        return () => map.remove();
-    }, [])
+        return () => {
+            map.remove();
+            mapRef.current = null;
+        }
+    }, [mapContainerRef])
 
 
     return (

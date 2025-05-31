@@ -1,11 +1,13 @@
+import Listing from "@/components/Listing";
 
-
-const Page = () => {
+const IndexPage = () => {
   return (
-    <div className="">
-      THIS IS THE INDEX PAGE!!!!!!!!!!
+    <div className="flex flex-col">
+      <Listing />
+      <Listing />
+      <Listing />
     </div>
   )
 };
 
-export default Page
+export default IndexPage

@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import citiesGeoJSON from "../../testdata/cities";
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { renderToString } from "react-dom/server";
+import Listing from "./Listing";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
@@ -61,7 +63,7 @@ const Map = () => {
                     closeButton: false
                 })
                     .setLngLat(coordinates)
-                    .setHTML(`<div class="px-2 py-1 bg-white text-black text-xs rounded shadow">${name}</div>`)
+                    .setHTML(renderToString(<Listing />))
                     // .setHTML(`<h1>Hello World!</h1>`)
                     .addTo(map);
             }

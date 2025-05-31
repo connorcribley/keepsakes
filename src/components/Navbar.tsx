@@ -13,7 +13,7 @@ const Navbar = () => {
       <div className="flex justify-between items-center">
 
         {/* Left: Logo and Menu */}
-        <Link href="/" className="flex items-center space-x-3 hover:text-orange-400">
+        <Link href="/" className="flex items-center space-x-3 hover:text-orange-400 transition">
           <Image
             src="/keepsakes_logo.svg"
             alt="Logo"
@@ -67,13 +67,6 @@ const Navbar = () => {
         <div
           className="absolute md:hidden right-6 top-full mt-2 w-40 bg-zinc-900 text-white rounded-md shadow-lg flex flex-col font-medium z-50"
         >
-          <Link
-            href="/index"
-            className="px-4 py-2 hover:bg-orange-500 rounded"
-            onClick={() => setIsOpen(false)}
-          >
-            Menu
-          </Link>
           <Link
             href="/login"
             className="px-4 py-2 hover:bg-orange-500 rounded"

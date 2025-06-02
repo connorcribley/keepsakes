@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, StarHalf, StarOff } from 'lucide-react';
+import { Star, StarHalf} from 'lucide-react';
 
 interface StarRatingProps {
   rating: number; // e.g. 4.5
@@ -17,7 +17,7 @@ const StarRating = ({ rating, max = 5 }: StarRatingProps) => {
         } else if (rating > i && rating < starNumber) {
           return <StarHalf key={i} size={30} className="text-yellow-400 fill-yellow-400" />;
         } else {
-          return <StarOff key={i} size={30} className="text-gray-400" />;
+          return <Star key={i} size={30} className="invisible" />;
         }
       })}
     </div>

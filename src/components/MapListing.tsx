@@ -3,7 +3,7 @@
 import Image from './Image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { X, UserCircle2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import StarRating from './StarRating';
 
 // interface ListingProps {
@@ -106,57 +106,6 @@ const Listing = (/* {
             </div>
           </div>
         </div>
-
-        {/* Modal */}
-        {isModalOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
-            onClick={() => setIsModalOpen(false)}
-          >
-            <div className="relative" onClick={(e) => e.stopPropagation()}>
-              <button
-                className="absolute -top-4 -right-4 bg-white text-black rounded-full p-1 cursor-pointer"
-                onClick={() => setIsModalOpen(false)}
-              >
-                <X size={20} />
-              </button>
-              <Image
-                src="listings/house9_xhspdp"
-                alt="Enlarged garage sale house"
-                width={800}
-                height={600}
-                className="rounded-lg max-w-full max-h-[90vh] object-contain"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Item Modal */}
-        {selectedItem && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
-            onClick={() => setSelectedItem(null)}
-          >
-            <div className="relative bg-zinc-900 rounded-lg p-4 max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
-              <button
-                className="absolute -top-4 -right-4 bg-white text-black rounded-full p-1 cursor-pointer"
-                onClick={() => setSelectedItem(null)}
-              >
-                <X size={20} />
-              </button>
-              <Image
-                src={selectedItem.src}
-                alt={selectedItem.name}
-                width={600}
-                height={400}
-                className="rounded-lg object-contain mb-4"
-              />
-              <h2 className="text-white text-xl font-semibold">{selectedItem.name}</h2>
-              <p className="text-orange-400 text-md mt-1">Price: ${selectedItem.price}</p>
-              <p className="text-gray-300 text-md mt-1">{selectedItem.description}</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

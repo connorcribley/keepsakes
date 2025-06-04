@@ -2,7 +2,7 @@
 
 import Image from './Image';
 import Link from 'next/link';
-import { useState } from 'react';
+// import { useState } from 'react';
 import StarRating from './StarRating';
 
 // interface ListingProps {

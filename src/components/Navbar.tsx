@@ -26,7 +26,7 @@ const Navbar = () => {
 
         {/* Center: Listings / Map */}
         <div className="flex-grow flex justify-center items-center space-x-3">
-          <Link href="/index" className="flex items-center space-x-1 hover:text-orange-400 transition">
+          <Link href="/listings" className="flex items-center space-x-1 hover:text-orange-400 transition">
             <List size={24} />
             <span className="hidden md:inline">Listings</span>
           </Link>

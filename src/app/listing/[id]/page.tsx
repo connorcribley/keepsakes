@@ -6,11 +6,11 @@ import StarRating from "@/components/StarRating";
 import { useState } from "react";
 import { X, UserCircle2, ChevronUp, ChevronDown, ImageIcon} from "lucide-react";
 
-type Props = {
-    params: {
-        id: string;
-    };
-}
+// type Props = {
+//     params: {
+//         id: string;
+//     };
+// }
 
 interface Item {
     src: string;
@@ -19,7 +19,7 @@ interface Item {
     description: string;
 }
 
-const ListingPage = ({ params }: Props) => {
+const ListingPage = (/* { params }: Props */) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [itemsOpen, setItemsOpen] = useState(true);
     const [commentsOpen, setCommentsOpen] = useState(true);
@@ -206,7 +206,7 @@ const ListingPage = ({ params }: Props) => {
                                         }}
                                     />
                                     {previewImage && (
-                                        <img
+                                        <Image
                                             src={previewImage}
                                             alt="Preview"
                                             className="w-16 h-16 rounded object-cover border border-gray-600"

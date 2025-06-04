@@ -6,20 +6,20 @@ import { useState } from "react";
 import { X, UserCircle2, ChevronUp, ChevronDown, MapPin } from "lucide-react";
 import Listing from "@/components/Listing";
 
-type Props = {
-    params: {
-        id: string;
-    };
-}
+// type Props = {
+//     params: {
+//         id: string;
+//     };
+// }
 
-interface Item {
-    src: string;
-    name: string;
-    price: number;
-    description: string;
-}
+// interface Item {
+//     src: string;
+//     name: string;
+//     price: number;
+//     description: string;
+// }
 
-const UserPage = ({ params }: Props) => {
+const UserPage = (/* { params }: Props */) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [itemsOpen, setItemsOpen] = useState(true);
     const [commentsOpen, setCommentsOpen] = useState(true);

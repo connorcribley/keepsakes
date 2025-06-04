@@ -27,8 +27,8 @@ const MapListing = (/* {
   description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum.",
   items,
 }: ListingProps */) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
   const items: Item[] = [
     { src: "items/rocking_horse_oyhqq9", name: "Rocking Horse", price: 25, description: "lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, error alias. Error velit labore, asperiores facilis deleniti sequi adipisci laudantium eaque quo nam dolore eius inventore devitis, mollitia impedit porro." },
@@ -57,7 +57,7 @@ const MapListing = (/* {
         {/* House Image */}
         <div className="flex flex-col items-center gap-4">
           <div className="w-full max-w-[300px] rounded-lg overflow-hidden cursor-pointer"
-            onClick={() => setIsModalOpen(true)}>
+            /* onClick={() => setIsModalOpen(true)} */>
             <Image
               src="listings/house9_xhspdp"
               alt="Garage sale house"
@@ -95,7 +95,7 @@ const MapListing = (/* {
                 <div
                   key={index}
                   className="flex-shrink-0 rounded-lg overflow-hidden"
-                  onClick={() => setSelectedItem(item)}
+                  /* onClick={() => setSelectedItem(item)} */
                 >
                   <Image
                     src={item.src}

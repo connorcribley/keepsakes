@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import citiesGeoJSON from "../../testdata/cities";
 import 'mapbox-gl/dist/mapbox-gl.css';
-import ReactDOMServer, { renderToString } from "react-dom/server";
+import ReactDOMServer from "react-dom/server";
 import MapListing from "./MapListing";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;

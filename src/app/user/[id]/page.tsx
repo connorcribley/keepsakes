@@ -1,8 +1,6 @@
 "use client";
 
-import { notFound } from "next/navigation";
 import Image from "@/components/Image";
-import Link from "next/link";
 import StarRating from "@/components/StarRating";
 import { useState } from "react";
 import { X, UserCircle2, ChevronUp, ChevronDown, MapPin } from "lucide-react";

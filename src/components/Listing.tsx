@@ -3,7 +3,7 @@
 import Image from './Image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { X, UserCircle2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import StarRating from './StarRating';
 
 // interface ListingProps {

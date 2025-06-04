@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import citiesGeoJSON from "../../testdata/cities";
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { renderToString } from "react-dom/server";
-import Listing from "./Listing";
+import ReactDOMServer, { renderToString } from "react-dom/server";
+import MapListing from "./MapListing";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
@@ -53,9 +53,12 @@ const Map = () => {
             if (!feature || feature.geometry.type !== 'Point') return;
 
             const coordinates = (feature.geometry.coordinates as [number, number]);
-            const name = feature.properties?.name;
 
-            if (coordinates && name) {
+            const popupNode = document.createElement("div");
+            popupNode.className = "bg-zinc-900 text-white rounded-lg p-4 shadow-xl max-w-xs";
+            popupNode.innerHTML = ReactDOMServer.renderToString(<MapListing />);
+
+            if (coordinates) {
                 new mapboxgl.Popup({
                     closeOnClick: true,
                     offset: 15,
@@ -63,7 +66,7 @@ const Map = () => {
                     closeButton: false
                 })
                     .setLngLat(coordinates)
-                    .setHTML(renderToString(<Listing />))
+                    .setDOMContent(popupNode)
                     // .setHTML(`<h1>Hello World!</h1>`)
                     .addTo(map);
             }

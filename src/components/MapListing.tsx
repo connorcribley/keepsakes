@@ -3,7 +3,6 @@
 import Image from './Image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { X } from 'lucide-react';
 import StarRating from './StarRating';
 
 // interface ListingProps {
@@ -21,7 +20,7 @@ interface Item {
   description: string;
 }
 
-const Listing = (/* {
+const MapListing = (/* {
   houseImg,
   address,
   user,
@@ -50,14 +49,14 @@ const Listing = (/* {
   ]
 
   return (
-    <div className="border-2 border-orange-400 rounded-2xl p-4 text-gray-200 shadow-sm mx-auto w-full max-w-6xl m-2">
+    <div className="rounded-2xl p-4 text-gray-200 shadow-sm mx-auto w-full max-w-6xl m-2">
 
       <div className="flex flex-col gap-4">
 
 
         {/* House Image */}
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-          <div className="mb-1 rounded-lg overflow-hidden md:max-w-sm cursor-pointer"
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-full max-w-[300px] rounded-lg overflow-hidden cursor-pointer"
             onClick={() => setIsModalOpen(true)}>
             <Image
               src="listings/house9_xhspdp"
@@ -66,6 +65,11 @@ const Listing = (/* {
               height={300}
               className="rounded-lg object-cover w-full border border-gray-200"
             />
+            {/* <img
+              src="https://res.cloudinary.com/dx83fnzoj/image/upload/c_scale,w_600/listings/house9_xhspdp.jpg"
+              alt="Garage sale house"
+              className="rounded-lg object-cover w-full border border-gray-200"
+            /> */}
           </div>
 
 
@@ -79,7 +83,6 @@ const Listing = (/* {
               <span className='font-semibold text-amber-400'>{"(3)"}</span>
             </div>
             <p className="text-sm my-1 text-gray-400">Posted by <Link href="/user/12345" className="cursor-pointer hover:underline">Bert</Link> on June 1st, 2025</p>
-            <p className="text-sm my-1">Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, error alias. Error velit labore, asperiores facilis deleniti sequi adipisci laudantium eaque quos nam dolore eius inventore debitis, mollitia impedit porro.</p>
           </div>
         </div>
 
@@ -111,4 +114,4 @@ const Listing = (/* {
   );
 };
 
-export default Listing;
+export default MapListing;

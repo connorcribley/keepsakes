@@ -86,7 +86,7 @@ const Listing = (/* {
         {/* Item Thumbnails */}
         <h1 className='font-bold text-gray-200 text-lg'>Items for sale:</h1>
         <div className="relative">
-          <div className="overflow-x-auto mt-2" style={{ paddingBottom: '16px' }}>
+          <div className="overflow-x-auto mt-2">
             <div className="flex space-x-3 w-max">
               {items.map((item, index) => (
                 <div

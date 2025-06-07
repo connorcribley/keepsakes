@@ -1,5 +1,6 @@
 import Image from '@/components/Image';
-import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
+import { FaGoogle, FaGithub, FaFacebook } from 'react-icons/fa';
+import GithubSignIn from '@/components/GithubSignIn';
 
 const LoginPage = () => {
     return (
@@ -22,9 +23,7 @@ const LoginPage = () => {
                         <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
                             <FaGoogle className="w-5 h-5" />
                         </button>
-                        <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
-                            <FaApple className="w-5 h-5" />
-                        </button>
+                        <GithubSignIn />
                         <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
                             <FaFacebook className="w-5 h-5" />
                         </button>
@@ -37,12 +36,20 @@ const LoginPage = () => {
                     </div>
 
                     {/* Form Inputs */}
-                    <form className="space-y-4">
+                    <form
+                        className="space-y-4"
+                        action={async () => {
+                            "use server";
+                        }}
+                    >
                         <div>
                             <label className="block text-sm text-gray-300 mb-1">Username</label>
                             <input
+                                name="username"
                                 type="text"
                                 placeholder="your_username"
+                                required
+                                autoComplete='username'
                                 className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>
@@ -50,8 +57,11 @@ const LoginPage = () => {
                         <div>
                             <label className="block text-sm text-gray-300 mb-1">Email</label>
                             <input
+                                name='email'
                                 type="email"
                                 placeholder="you@example.com"
+                                required
+                                autoComplete='email'
                                 className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>
@@ -59,8 +69,11 @@ const LoginPage = () => {
                         <div>
                             <label className="block text-sm text-gray-300 mb-1">Password</label>
                             <input
+                                name='password'
                                 type="password"
                                 placeholder="••••••••"
+                                required
+                                autoComplete='current-password'
                                 className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>

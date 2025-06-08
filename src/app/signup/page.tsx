@@ -1,8 +1,15 @@
+"use server";
+
 import Image from '@/components/Image';
-import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
+import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import GithubSignIn from '@/components/auth/GithubSignIn';
+import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
+const SignupPage = async () => {
+    const session = await auth();
+    if (session) redirect('/');
 
-const SignupPage = () => {
     return (
         <>
             <div className="absolute inset-0 -z-10">
@@ -23,9 +30,7 @@ const SignupPage = () => {
                         <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
                             <FaGoogle className="w-5 h-5" />
                         </button>
-                        <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
-                            <FaApple className="w-5 h-5" />
-                        </button>
+                        <GithubSignIn />
                         <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
                             <FaFacebook className="w-5 h-5" />
                         </button>

@@ -1,12 +1,14 @@
-'use client';
+'use server';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Menu, X, MapPinned, List } from 'lucide-react';
+import Image from '@/components/Image';
+import { MapPinned, List, UserCircle2 } from 'lucide-react';
+import FloatingNavMenu from './FloatingNavMenu';
+import { auth } from '@/lib/auth';
+import LogOut from './auth/LogOut';
 
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const Navbar = async () => {
+  const session = await auth();
 
   return (
     <nav className="sticky relative top-0 bg-black text-white px-6 py-2 shadow-md z-50">
@@ -15,7 +17,7 @@ const Navbar = () => {
         {/* Left: Logo and Menu */}
         <Link href="/" className="flex items-center space-x-3 hover:text-orange-400 transition">
           <Image
-            src="/keepsakes_logo.svg"
+            src="/keepsakes_logo_stksga"
             alt="Logo"
             width={50}
             height={50}
@@ -37,52 +39,38 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex space-x-6 font-medium">
-          <Link href="/login" className="hover:text-orange-400 transition">
-            Login
-          </Link>
-          <Link href="/signup" className="hover:text-orange-400 transition">
-            Signup
-          </Link>
-        </div>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          className="md:hidden cursor-pointer"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          {isOpen ?
-            <X size={24} /> :
-            <div className="rounded border border-gray-300 hover:text-orange-400 hover:border-orange-400 p-1">
-              <Menu size={24} />
-            </div>
-          }
-        </button>
+        {/* Desktop Auth Links */}
+        {session && session.user ? (
+          <div className="flex space-x-3 font-medium items-center">  {/* Delete this later */}
+            <LogOut />
+            <Link href="/user/12345" className="hover:text-orange-400 transition">
+              {session.user.image ? (
+                <img
+                  src={session.user.image}
+                  alt="Logo"
+                  width={40}
+                  height={40}
+                  className="cursor-pointer rounded-full border-2 border-gray-200 hover:border-orange-400 transition"
+                />) : (
+                <UserCircle2 size={40} />
+              )}
+            </Link>
+          </div>
+        ) : (
+          <div className="hidden md:flex space-x-6 font-medium">
+            <Link href="/login" className="hover:text-orange-400 transition">
+              Login
+            </Link>
+            <Link href="/signup" className="hover:text-orange-400 transition">
+              Signup
+            </Link>
+          </div>
+        )}
+
+        {/* Mobile Floating Menu */}
+        <FloatingNavMenu isLoggedIn={!!session} />
       </div>
-
-      {/* Mobile Floating Menu */}
-      {isOpen && (
-        <div
-          className="absolute md:hidden right-6 top-full mt-2 w-40 bg-zinc-900 text-white rounded-md shadow-lg flex flex-col font-medium z-50"
-        >
-          <Link
-            href="/login"
-            className="px-4 py-2 hover:bg-orange-500 rounded"
-            onClick={() => setIsOpen(false)}
-          >
-            Login
-          </Link>
-          <Link
-            href="/signup"
-            className="px-4 py-2 hover:bg-orange-500 rounded"
-            onClick={() => setIsOpen(false)}
-          >
-            Signup
-          </Link>
-        </div>
-      )}
     </nav>
   );
 };

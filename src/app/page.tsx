@@ -1,6 +1,13 @@
 import Image from '@/components/Image';
+import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
-const Home = () => {
+const Home = async () => {
+
+  const session = await auth();
+
+  // if (!session) redirect('/login');
+
   return (
     <>
       <div className="absolute inset-0 -z-10">

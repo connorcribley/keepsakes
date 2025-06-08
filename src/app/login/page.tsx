@@ -1,8 +1,15 @@
 import Image from '@/components/Image';
-import { FaGoogle, FaGithub, FaFacebook } from 'react-icons/fa';
-import GithubSignIn from '@/components/GithubSignIn';
+import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import GithubSignIn from '@/components/auth/GithubSignIn';
+import { auth, signIn } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import executeAction from '@/lib/executeAction';
 
-const LoginPage = () => {
+const LoginPage = async () => {
+    const session = await auth();
+    if (session) redirect('/');
+
+
     return (
         <>
             <div className="absolute inset-0 -z-10">
@@ -38,8 +45,13 @@ const LoginPage = () => {
                     {/* Form Inputs */}
                     <form
                         className="space-y-4"
-                        action={async () => {
+                        action={async (formData: FormData) => {
                             "use server";
+                            await executeAction({
+                                actionFn: async () => {
+                                    await signIn('credentials', formData)
+                                }
+                            })
                         }}
                     >
                         <div>

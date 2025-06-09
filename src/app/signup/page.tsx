@@ -1,9 +1,8 @@
-"use server";
-
 import Image from '@/components/Image';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
 import GithubSignIn from '@/components/auth/GithubSignIn';
 import { auth } from '@/lib/auth';
+import { signUp } from '../actions/auth';
 import { redirect } from 'next/navigation';
 
 const SignupPage = async () => {
@@ -43,12 +42,28 @@ const SignupPage = async () => {
                     </div>
 
                     {/* Form Inputs */}
-                    <form className="space-y-4">
+                    <form
+                        className="space-y-4"
+                        action={async (formData: FormData) => {
+                            "use server";
+
+                            const res = await signUp(formData);
+
+                            if (res.success) {
+                                redirect("/login");
+                            } else {
+                                console.log("ERROR!!!!!!! :(")
+                            }
+                        }}
+                    >
                         <div>
                             <label className="block text-sm text-gray-300 mb-1">Username</label>
                             <input
+                                name="username"
                                 type="text"
                                 placeholder="your_username"
+                                required
+                                autoComplete='username'
                                 className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>
@@ -56,8 +71,11 @@ const SignupPage = async () => {
                         <div>
                             <label className="block text-sm text-gray-300 mb-1">Email</label>
                             <input
+                                name='email'
                                 type="email"
                                 placeholder="you@example.com"
+                                required
+                                autoComplete='email'
                                 className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>
@@ -65,8 +83,11 @@ const SignupPage = async () => {
                         <div>
                             <label className="block text-sm text-gray-300 mb-1">Password</label>
                             <input
+                                name='password'
                                 type="password"
                                 placeholder="••••••••"
+                                required
+                                autoComplete='current-password'
                                 className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>

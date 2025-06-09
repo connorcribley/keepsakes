@@ -8,12 +8,12 @@ type Options<T> = {
 const executeAction = async <T>({
     actionFn,
     successMessage = "Action completed successfully",
-}: Options<T>): Promise<{ sucess: boolean; message: string; }> => {
+}: Options<T>): Promise<{ success: boolean; message: string; }> => {
     try {
         await actionFn();
 
         return {
-            sucess: true,
+            success: true,
             message: successMessage,
         }
     } catch (error) {
@@ -21,7 +21,7 @@ const executeAction = async <T>({
             throw error;
         }
         return {
-            sucess: false,
+            success: false,
             message: "An error has occurred"
         };
     }

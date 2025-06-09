@@ -57,11 +57,11 @@ const LoginPage = async () => {
                         <div>
                             <label className="block text-sm text-gray-300 mb-1">Username</label>
                             <input
-                                name="username"
+                                name="name"
                                 type="text"
-                                placeholder="your_username"
+                                placeholder="your_name"
                                 required
-                                autoComplete='username'
+                                autoComplete='name'
                                 className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>

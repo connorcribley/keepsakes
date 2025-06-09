@@ -16,7 +16,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         GitHub,
         Credentials({
             credentials: {
-                username: {},
+                name: {},
                 email: {},
                 password: {},
             },
@@ -25,7 +25,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
                 const user = await prisma.user.findFirst({
                     where: { 
-                        username: validatedCredentials.username, 
+                        name: validatedCredentials.name, 
                         email: validatedCredentials.email, 
                         password: validatedCredentials.password 
                     }

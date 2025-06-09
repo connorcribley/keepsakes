@@ -16,13 +16,13 @@ const logout = async () => {
 const signUp = async (formData: FormData) => {
     return executeAction({
         actionFn: async () => {
-            const username = formData.get("username");
+            const name = formData.get("name");
             const email = formData.get("email");
             const password = formData.get("password");
-            const validatedData = schema.parse({ username, email, password })
+            const validatedData = schema.parse({ name, email, password })
             await prisma.user.create({
                 data: {
-                    username: validatedData.username,
+                    name: validatedData.name,
                     email: validatedData.email,
                     password: validatedData.password
                 }

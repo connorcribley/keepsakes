@@ -9,6 +9,10 @@ const loginGithub = async () => {
     await signIn("github");
 }
 
+const loginGoogle = async () => {
+    await signIn("google");
+}
+
 const logout = async () => {
     await signOut();
 }
@@ -32,4 +36,4 @@ const signUp = async (formData: FormData) => {
     })
 }
 
-export { loginGithub, logout, signUp };
+export { loginGithub, loginGoogle, logout, signUp };

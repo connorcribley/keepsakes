@@ -1,6 +1,7 @@
 import Image from '@/components/Image';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
 import GithubSignIn from '@/components/auth/GithubSignIn';
+import GoogleSignIn from '@/components/auth/GoogleSignIn';
 import { auth, signIn } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import executeAction from '@/lib/executeAction';
@@ -27,9 +28,7 @@ const LoginPage = async () => {
 
                     {/* Social Auth Buttons */}
                     <div className="flex justify-center gap-4">
-                        <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
-                            <FaGoogle className="w-5 h-5" />
-                        </button>
+                        <GoogleSignIn />
                         <GithubSignIn />
                         <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
                             <FaFacebook className="w-5 h-5" />

@@ -53,24 +53,13 @@ const LoginPage = async () => {
                             })
                         }}
                     >
-                        <div>
-                            <label className="block text-sm text-gray-300 mb-1">Username</label>
-                            <input
-                                name="name"
-                                type="text"
-                                placeholder="your_name"
-                                required
-                                autoComplete='name'
-                                className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            />
-                        </div>
 
                         <div>
                             <label className="block text-sm text-gray-300 mb-1">Email</label>
                             <input
                                 name='email'
                                 type="email"
-                                placeholder="you@example.com"
+                                placeholder="johndoe@example.com"
                                 required
                                 autoComplete='email'
                                 className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"

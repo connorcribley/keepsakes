@@ -4,9 +4,10 @@ import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
 import { prisma } from "./prisma"
 import { PrismaAdapter } from "@auth/prisma-adapter"
-import { schema } from "./schema"
+import { loginSchema } from "./schema"
 import { v4 as uuid } from "uuid"
 import { encode } from "next-auth/jwt"
+import bcrypt from "bcrypt"
 
 
 const adapter = PrismaAdapter(prisma)
@@ -18,22 +19,23 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         GitHub,
         Credentials({
             credentials: {
-                name: {},
                 email: {},
                 password: {},
             },
             authorize: async (credentials) => {
-                const validatedCredentials = await schema.parse(credentials)
+                const validatedCredentials = await loginSchema.parse(credentials)
 
                 const user = await prisma.user.findFirst({
                     where: { 
-                        name: validatedCredentials.name, 
-                        email: validatedCredentials.email, 
-                        password: validatedCredentials.password 
+                        email: validatedCredentials.email 
                     }
                 })
 
-                if (!user) {
+                if (
+                    !user ||
+                    !user.password ||
+                    !(await bcrypt.compare(validatedCredentials.password, user.password))
+                ) {
                     throw new Error("Invalid credentials")
                 }
 

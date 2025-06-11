@@ -1,11 +1,20 @@
 import { z } from 'zod';
 
-const schema = z.object({
+const signupSchema = z.object({
     name: z.string().min(1, "Username is required"),
     email: z.string().email("Invalid email address").min(1, "Email is required"),
     password: z.string().min(1, "Password is required"),
 });
 
-type Schema = z.infer<typeof schema>
+const loginSchema = z.object({
+    email: z.string().email("Invalid email address").min(1, "Email is required"),
+    password: z.string().min(1, "Password is required"),
+});
 
-export { schema, type Schema};
+type SignupSchema = z.infer<typeof signupSchema>
+type LoginSchema = z.infer<typeof loginSchema>
+
+export {
+    signupSchema, type SignupSchema,
+    loginSchema, type LoginSchema
+};

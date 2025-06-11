@@ -2,7 +2,8 @@ import Image from '@/components/Image';
 import { FaFacebook } from 'react-icons/fa';
 import GithubSignIn from '@/components/auth/GithubSignIn';
 import GoogleSignIn from '@/components/auth/GoogleSignIn';
-import { auth } from '@/lib/auth';
+import executeAction from '@/lib/executeAction';
+import { auth, signIn } from '@/lib/auth';
 import { signUp } from '../actions/auth';
 import { redirect } from 'next/navigation';
 
@@ -49,7 +50,11 @@ const SignupPage = async () => {
                             const res = await signUp(formData);
 
                             if (res.success) {
-                                redirect("/login");
+                                await executeAction({
+                                actionFn: async () => {
+                                    await signIn('credentials', formData)
+                                }
+                            })
                             } else {
                                 console.log("ERROR!!!!!!! :(")
                             }

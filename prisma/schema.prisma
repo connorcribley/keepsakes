@@ -29,7 +29,7 @@ model User {
   listings Listing[]
   reviews  Review[]
 
-  currentLocation Unsupported("geometry")?
+  currentLocation Unsupported("geometry(Point,4326)?")?
 
   sentMessages     DirectMessage[] @relation("SentMessages")
   receivedMessages DirectMessage[] @relation("ReceivedMessages")

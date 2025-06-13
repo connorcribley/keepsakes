@@ -1,8 +1,11 @@
 import Map from "@/components/Map";
+import { auth } from '@/lib/auth';
 
-const MapPage = () => {
+const MapPage = async () => {
+  const session = await auth();
+
   return (
-    <Map />
+    <Map session={session}/>
   )
 };
 

@@ -1,7 +1,7 @@
 import Image from '@/components/Image';
-import { FaGoogle, FaFacebook } from 'react-icons/fa';
-import GithubSignIn from '@/components/auth/GithubSignIn';
 import GoogleSignIn from '@/components/auth/GoogleSignIn';
+import GithubSignIn from '@/components/auth/GithubSignIn';
+import FacebookSignIn from '@/components/auth/FacebookSignIn';
 import { auth, signIn } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import executeAction from '@/lib/executeAction';
@@ -30,9 +30,7 @@ const LoginPage = async () => {
                     <div className="flex justify-center gap-4">
                         <GoogleSignIn />
                         <GithubSignIn />
-                        <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
-                            <FaFacebook className="w-5 h-5" />
-                        </button>
+                        <FacebookSignIn />
                     </div>
 
                     <div className="flex items-center gap-2">

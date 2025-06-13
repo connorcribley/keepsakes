@@ -1,6 +1,7 @@
 import NextAuth from "next-auth"
-import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
+import GitHub from "next-auth/providers/github"
+import Facebook from "next-auth/providers/facebook"
 import Credentials from "next-auth/providers/credentials"
 import { prisma } from "./prisma"
 import { PrismaAdapter } from "@auth/prisma-adapter"
@@ -17,6 +18,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     providers: [
         Google,
         GitHub,
+        Facebook,
         Credentials({
             credentials: {
                 email: {},

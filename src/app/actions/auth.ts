@@ -6,12 +6,16 @@ import executeAction from "@/lib/executeAction"
 import { prisma } from "@/lib/prisma";
 import { signupSchema } from "@/lib/schema";
 
+const loginGoogle = async () => {
+    await signIn("google");
+}
+
 const loginGithub = async () => {
     await signIn("github");
 }
 
-const loginGoogle = async () => {
-    await signIn("google");
+const loginFacebook = async () => {
+    await signIn("facebook");
 }
 
 const logout = async () => {
@@ -38,4 +42,4 @@ const signUp = async (formData: FormData) => {
     })
 }
 
-export { loginGithub, loginGoogle, logout, signUp };
+export { loginGoogle, loginGithub, loginFacebook, logout, signUp };

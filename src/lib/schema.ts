@@ -11,10 +11,17 @@ const loginSchema = z.object({
     password: z.string().min(1, "Password is required"),
 });
 
+const locationSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+})
+
 type SignupSchema = z.infer<typeof signupSchema>
 type LoginSchema = z.infer<typeof loginSchema>
+type LocationSchema = z.infer<typeof locationSchema>
 
 export {
     signupSchema, type SignupSchema,
-    loginSchema, type LoginSchema
+    loginSchema, type LoginSchema,
+    locationSchema, type LocationSchema
 };

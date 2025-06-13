@@ -1,18 +1,29 @@
 "use client"
 
 import { useEffect, useRef } from "react";
+import getAddressFromCoordinates from "@/utils/getAddressFromCoordinates";
 import mapboxgl from "mapbox-gl";
 import citiesGeoJSON from "../../testdata/cities";
 import ReactDOMServer from "react-dom/server";
 import MapListing from "./MapListing";
+import axios from "axios";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
-const Map = () => {
+import type { Session } from "next-auth"; // Add this import if using next-auth
+
+interface Props {
+    session: Session | null;
+}
+
+const Map = ({ session }: Props) => {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<mapboxgl.Map | null>(null)
+    const markerRef = useRef<mapboxgl.Marker | null>(null)
+
 
     useEffect(() => {
+
         const container = mapContainerRef.current;
         if (!container || mapRef.current) return;
 
@@ -78,11 +89,41 @@ const Map = () => {
             map.getCanvas().style.cursor = '';
         });
 
+        navigator.geolocation.getCurrentPosition(
+            async ({ coords }) => {
+                const { latitude, longitude } = coords;
+
+                map.setCenter([longitude, latitude]);
+                map.setZoom(13);
+
+                if (markerRef.current) {
+                    markerRef.current.setLngLat([longitude, latitude]);
+                } else {
+                    markerRef.current = new mapboxgl.Marker({ color: "blue" })
+                        .setLngLat([longitude, latitude])
+                        .addTo(map)
+                    
+                }
+
+                if (session?.user?.email) {
+                    await axios.post("/api/userlocation", {
+                        lat: latitude,
+                        lng: longitude
+                    });
+                }
+            },
+            (error) => {
+                console.warn("Could not get user location", error)
+            },
+            { enableHighAccuracy: true }
+        )
+
         return () => {
             map.remove();
             mapRef.current = null;
         }
-    }, [mapContainerRef])
+
+    }, [mapContainerRef, session])
 
 
     return (

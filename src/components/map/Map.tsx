@@ -3,9 +3,10 @@
 import { useEffect, useRef } from "react";
 import getAddressFromCoordinates from "@/utils/getAddressFromCoordinates";
 import mapboxgl from "mapbox-gl";
-import citiesGeoJSON from "../../testdata/cities";
+import citiesGeoJSON from "../../../testdata/cities";
 import ReactDOMServer from "react-dom/server";
 import MapListing from "./MapListing";
+import LocationPopup from "./LocationPopup";
 import axios from "axios";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
@@ -19,8 +20,8 @@ interface Props {
 const Map = ({ session }: Props) => {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<mapboxgl.Map | null>(null)
-    const markerRef = useRef<mapboxgl.Marker | null>(null)
-
+    const locationMarkerRef = useRef<mapboxgl.Marker | null>(null)
+    const locationPopupRef = useRef<mapboxgl.Popup | null>(null);
 
     useEffect(() => {
 
@@ -96,13 +97,31 @@ const Map = ({ session }: Props) => {
                 map.setCenter([longitude, latitude]);
                 map.setZoom(13);
 
-                if (markerRef.current) {
-                    markerRef.current.setLngLat([longitude, latitude]);
+                if (locationMarkerRef.current) {
+                    locationMarkerRef.current.setLngLat([longitude, latitude]);
                 } else {
-                    markerRef.current = new mapboxgl.Marker({ color: "blue" })
+                    const marker = new mapboxgl.Marker({ color: "blue" })
                         .setLngLat([longitude, latitude])
                         .addTo(map)
-                    
+
+                    locationMarkerRef.current = marker;
+
+                    marker.getElement().style.cursor = "pointer";
+
+                    marker.getElement().addEventListener("click", async () => {
+                        const address = await getAddressFromCoordinates(latitude, longitude);
+
+                        if (locationPopupRef.current) locationPopupRef.current.remove();
+
+                        const popupNode = document.createElement("div");
+                        popupNode.className = "bg-zinc-900 text-white rounded-lg p-4 shadow-xl max-w-xs";
+                        popupNode.innerHTML = ReactDOMServer.renderToString(<LocationPopup address={address} />);
+
+                        locationPopupRef.current = new mapboxgl.Popup({ offset: 25 })
+                            .setLngLat([longitude, latitude])
+                            .setDOMContent(popupNode)
+                            .addTo(map);
+                    })
                 }
 
                 if (session?.user?.email) {

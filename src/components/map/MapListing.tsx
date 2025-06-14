@@ -1,9 +1,9 @@
 'use client';
 
-import Image from './Image';
+import Image from '../Image';
 import Link from 'next/link';
 // import { useState } from 'react';
-import StarRating from './StarRating';
+import StarRating from '../StarRating';
 
 // interface ListingProps {
 //   houseImg: string;

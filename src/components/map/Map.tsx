@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import getAddressFromCoordinates from "@/utils/getAddressFromCoordinates";
 import mapboxgl from "mapbox-gl";
 import citiesGeoJSON from "../../../testdata/cities";
 import ReactDOMServer from "react-dom/server";
 import MapListing from "./MapListing";
 import LocationPopup from "./LocationPopup";
+import FlashMessage from "../FlashMessage";
 import axios from "axios";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
@@ -22,6 +23,7 @@ const Map = ({ session }: Props) => {
     const mapRef = useRef<mapboxgl.Map | null>(null)
     const locationMarkerRef = useRef<mapboxgl.Marker | null>(null)
     const locationPopupRef = useRef<mapboxgl.Popup | null>(null);
+    const [isLocating, setIsLocating] = useState(false)
 
     useEffect(() => {
 
@@ -78,7 +80,6 @@ const Map = ({ session }: Props) => {
                 })
                     .setLngLat(coordinates)
                     .setDOMContent(popupNode)
-                    // .setHTML(`<h1>Hello World!</h1>`)
                     .addTo(map);
             }
         });
@@ -90,8 +91,12 @@ const Map = ({ session }: Props) => {
             map.getCanvas().style.cursor = '';
         });
 
+        setIsLocating(true);
+
         navigator.geolocation.getCurrentPosition(
             async ({ coords }) => {
+                setIsLocating(false)
+
                 const { latitude, longitude } = coords;
 
                 map.setCenter([longitude, latitude]);
@@ -132,7 +137,8 @@ const Map = ({ session }: Props) => {
                 }
             },
             (error) => {
-                console.warn("Could not get user location", error)
+                console.warn("Could not get user location", error);
+                setIsLocating(false);
             },
             { enableHighAccuracy: true }
         )
@@ -142,14 +148,17 @@ const Map = ({ session }: Props) => {
             mapRef.current = null;
         }
 
-    }, [mapContainerRef, session])
+    }, [session])
 
 
     return (
-        <div
-            ref={mapContainerRef}
-            className="w-full h-full"
-        ></div>
+        <>
+            {isLocating && <FlashMessage text="Loading your location..." />}
+            <div
+                ref={mapContainerRef}
+                className="w-full h-full"
+            ></div>
+        </>
     )
 };
 

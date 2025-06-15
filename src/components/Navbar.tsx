@@ -44,7 +44,7 @@ const Navbar = async () => {
         {session && session.user ? (
           <div className="flex space-x-3 font-medium items-center">  {/* Delete this later */}
             <LogOut />
-            <Link href="/user/12345" className="hover:text-orange-400 transition">
+            <Link href={`/user/${session.user.id}`} className="hover:text-orange-400 transition">
               {session.user.image ? (
                 <img
                   src={session.user.image}

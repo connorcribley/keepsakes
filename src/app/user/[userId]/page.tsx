@@ -1,25 +1,35 @@
-"use client";
 
 import Image from "@/components/Image";
 import StarRating from "@/components/StarRating";
-import { useState } from "react";
 import { X, UserCircle2, ChevronUp, ChevronDown, MapPin } from "lucide-react";
 import Listing from "@/components/Listing";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
 
 
-// type Props = {
-//     params: {
-//         id: string;
-//     };
-// }
+type Props = {
+    params: {
+        userId: string;
+    };
+}
 
 
 
-const UserPage = (/* { params }: Props */) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [itemsOpen, setItemsOpen] = useState(true);
-    const [commentsOpen, setCommentsOpen] = useState(true);
+const UserPage = async ({ params }: Props) => {
+    // const [isModalOpen, setIsModalOpen] = useState(false);
+    // const [itemsOpen, setItemsOpen] = useState(true);
+    // const [commentsOpen, setCommentsOpen] = useState(true);
+
+    const { userId } = await params;
+
+    const session = await auth();
+
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+    })
+
+    if (!user) notFound();
 
     const dummyComments = [
         {
@@ -51,19 +61,26 @@ const UserPage = (/* { params }: Props */) => {
                             <div className="flex items-center gap-4">
                                 <div
                                     className="w-[100px] h-[100px] rounded-full overflow-hidden cursor-pointer"
-                                    onClick={() => setIsModalOpen(true)}
+                                /* onClick={() => setIsModalOpen(true)} */
                                 >
-                                    <Image
-                                        src="users/guy_t8mxvo"
-                                        alt="Some guy"
-                                        width={100}
-                                        height={100}
-                                        className="rounded-full w-full h-full object-cover border border-black"
-                                    />
+                                    {user.image ? (
+                                        <Image
+                                            src={user.image}
+                                            alt="profile picture"
+                                            width={100}
+                                            height={100}
+                                            className="rounded-full w-full h-full object-cover border border-black"
+                                        />
+                                    ) : (
+                                        <UserCircle2
+                                            width={100}
+                                            height={100}
+                                        />
+                                    )}
                                 </div>
 
                                 <div className="flex flex-col">
-                                    <h2 className="text-2xl font-bold">John Doe</h2>
+                                    <h2 className="text-2xl font-bold">{user.name}</h2>
                                     <div className="flex items-center">
                                         <MapPin size={20} className="text-orange-400 mr-2" />
                                         <p className="text-sm text-orange-400">New York, NY</p>
@@ -82,74 +99,74 @@ const UserPage = (/* { params }: Props */) => {
                     {/* Toggle Item List */}
                     <div
                         className="flex items-center justify-start cursor-pointer select-none"
-                        onClick={() => setItemsOpen(prev => !prev)}
+                    /* onClick={() => setItemsOpen(prev => !prev)} */
                     >
                         <h1 className="text-xl font-semibold text-gray-200 my-2">
                             Previous Listings <span>(3)</span>
                         </h1>
-                        {itemsOpen ? (
-                            <ChevronUp size={30} className="mx-2 text-gray-400" />
-                        ) : (
+                        {/* {itemsOpen ? ( */}
+                        <ChevronUp size={30} className="mx-2 text-gray-400" />
+                        {/* ) : (
                             <ChevronDown size={30} className="mx-2 text-gray-400" />
-                        )}
+                        )} */}
                     </div>
 
                     {/* Conditionally render item list */}
-                    {itemsOpen && (
-                        <div className="overflow-y-auto pr-2 rounded-2xl transition-all duration-300 ease-in-out">
-                            <div className="flex flex-col gap-3">
-                                <Listing />
-                                <Listing />
-                                <Listing />
-                            </div>
+                    {/* {itemsOpen && ( */}
+                    <div className="overflow-y-auto pr-2 rounded-2xl transition-all duration-300 ease-in-out">
+                        <div className="flex flex-col gap-3">
+                            <Listing />
+                            <Listing />
+                            <Listing />
                         </div>
-                    )}
+                    </div>
+                    {/* )} */}
                 </div>
 
                 {/* Reviews */}
                 <div className="my-5 w-full lg:w-[400px] flex-shrink-0">
                     <div
                         className="flex items-center justify-start cursor-pointer select-none mb-4"
-                        onClick={() => setCommentsOpen(prev => !prev)}
+                    /* onClick={() => setCommentsOpen(prev => !prev)} */
                     >
                         <h1 className="text-xl font-semibold text-gray-200">
                             Reviews Left <span>({dummyComments.length})</span>
                         </h1>
-                        {commentsOpen ? (
-                            <ChevronUp size={30} className="mx-2 text-gray-400" />
-                        ) : (
+                        {/* {commentsOpen ? ( */}
+                        <ChevronUp size={30} className="mx-2 text-gray-400" />
+                        {/* ) : (
                             <ChevronDown size={30} className="mx-2 text-gray-400" />
-                        )}
+                        )} */}
                     </div>
 
-                    {commentsOpen && (
-                        <div className="space-y-2">
-                            {dummyComments.map((review, index) => (
-                                <div key={index} className="border border-gray-700 rounded-xl p-4 bg-zinc-900 text-gray-200 shadow space-y-3">
-                                    <div className="flex flex-col md:flex-row items-start justify-between mb-2 gap-2">
-                                        <div className="flex items-center gap-3">
-                                            <UserCircle2 className="w-6 h-6 text-gray-400" />
-                                            <p className="font-medium">{review.username}</p>
-                                        </div>
-                                        <StarRating rating={review.rating} />
+                    {/* {commentsOpen && ( */}
+                    <div className="space-y-2">
+                        {dummyComments.map((review, index) => (
+                            <div key={index} className="border border-gray-700 rounded-xl p-4 bg-zinc-900 text-gray-200 shadow space-y-3">
+                                <div className="flex flex-col md:flex-row items-start justify-between mb-2 gap-2">
+                                    <div className="flex items-center gap-3">
+                                        <UserCircle2 className="w-6 h-6 text-gray-400" />
+                                        <p className="font-medium">{review.username}</p>
                                     </div>
-                                    <Image
-                                        src="reports/garage_sale6_fxkgb9"
-                                        alt="Garage sale house"
-                                        width={600}
-                                        height={300}
-                                        className="rounded-lg object-cover w-full"
-                                    />
-                                    <p className="text-sm text-gray-300">{review.comment}</p>
+                                    <StarRating rating={review.rating} />
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                                <Image
+                                    src="reports/garage_sale6_fxkgb9"
+                                    alt="Garage sale house"
+                                    width={600}
+                                    height={300}
+                                    className="rounded-lg object-cover w-full"
+                                />
+                                <p className="text-sm text-gray-300">{review.comment}</p>
+                            </div>
+                        ))}
+                    </div>
+                    {/* )} */}
                 </div>
             </div>
 
             {/* Modal */}
-            {isModalOpen && (
+            {/* {isModalOpen && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
                     onClick={() => setIsModalOpen(false)}
@@ -170,7 +187,7 @@ const UserPage = (/* { params }: Props */) => {
                         />
                     </div>
                 </div>
-            )}
+            )} */}
         </div>
     )
 };

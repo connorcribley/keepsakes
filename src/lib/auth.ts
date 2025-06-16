@@ -103,8 +103,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
                 // Default Profile Picture
                 if (!imageUrl) {
-                    imageUrl = 'https://res.cloudinary.com/dx83fnzoj/image/upload/v1750029989/user_profiles/default-profile_waicp1.svg'
-                    return;
+                    imageUrl = 'https://res.cloudinary.com/dx83fnzoj/image/upload/v1750111768/user_profiles/default-pfp_wm30df.svg'
                 } else {
                     const uploadResult = await cloudinary.v2.uploader.upload(imageUrl, {
                         folder: "user_profiles",
@@ -118,6 +117,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     where: { id: user.id },
                     data: { image: imageUrl },
                 });
+
 
             } catch (error) {
                 console.error("Error in createUser event:", error);

@@ -34,7 +34,8 @@ const signUp = async (formData: FormData) => {
                 data: {
                     name: validatedData.name,
                     email: validatedData.email,
-                    password: hashedPassword
+                    password: hashedPassword,
+                    image: 'https://res.cloudinary.com/dx83fnzoj/image/upload/v1750111768/user_profiles/default-pfp_wm30df.svg'
                 }
             })
         },

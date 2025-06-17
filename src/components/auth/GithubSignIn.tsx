@@ -7,8 +7,8 @@ const GithubSignIn = () => {
         <form
             action={loginGithub}
         >
-            <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
-                <FaGithub className="w-5 h-5" />
+            <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:hover:bg-orange-400 transition">
+                <FaGithub className="w-7 h-7" />
             </button>
         </form>
     )

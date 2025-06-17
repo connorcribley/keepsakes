@@ -36,3 +36,21 @@ body {
 .mapboxgl-popup-tip {
   border-top-color: #1f2937 !important; /* same as content background */
 }
+
+.captcha-wrapper {
+  display: flex;
+  flex-direction: column; /* stack vertically */
+  align-items: center;
+  gap: 0.5rem; /* add spacing between badge and button */
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.grecaptcha-badge {
+  display: block !important;
+  position: static !important;
+  /* transform: scale(0.75); or tweak as needed */
+  transform-origin: center center;
+  width: auto !important;
+  max-width: 100%;
+}

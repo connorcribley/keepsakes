@@ -30,14 +30,16 @@ const signUp = async (formData: FormData) => {
             const password = formData.get("password");
             const validatedData = signupSchema.parse({ name, email, password })
             const hashedPassword = await bcrypt.hash(validatedData.password, 10);
-            await prisma.user.create({
+            const user = await prisma.user.create({
                 data: {
                     name: validatedData.name,
                     email: validatedData.email,
                     password: hashedPassword,
                     image: 'https://res.cloudinary.com/dx83fnzoj/image/upload/v1750111768/user_profiles/default-pfp_wm30df.svg'
                 }
-            })
+            });
+
+            return user;
         },
         successMessage: "Signed up successfully",
     })

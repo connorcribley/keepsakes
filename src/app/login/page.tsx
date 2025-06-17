@@ -22,8 +22,8 @@ const LoginPage = async () => {
                     className="w-full h-full object-cover opacity-30"
                 />
             </div>
-            <div className="flex flex-col items-center text-center justify-center h-full text-white mx-16">
-                <div className="bg-zinc-900 text-white w-full max-w-md mx-auto p-8 rounded-2xl shadow-lg space-y-6 border border-gray-700 max-w-2xl">
+            <div className="flex flex-col items-center text-center justify-center h-full text-white mx-4 sm:mx-8 md:mx-16">
+                <div className="bg-zinc-900 text-white w-full mx-auto p-8 rounded-2xl shadow-lg space-y-6 border border-gray-700 max-w-sm sm:max-w-md">
                     <h2 className="text-2xl font-bold text-center">Login to Keepsakes</h2>
 
                     {/* Social Auth Buttons */}

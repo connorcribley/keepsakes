@@ -8,8 +8,8 @@ const GoogleSignIn = () => {
         <form
             action={loginGoogle}
         >
-            <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:opacity-80 transition">
-                <FaGoogle className="w-5 h-5" />
+            <button className="cursor-pointer bg-white text-black rounded-full p-2 hover:bg-orange-400 transition">
+                <FaGoogle className="w-7 h-7" />
             </button>
         </form>
   )

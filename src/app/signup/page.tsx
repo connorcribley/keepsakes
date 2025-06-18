@@ -53,7 +53,6 @@ const SignupPage = async () => {
 
     return (
         <>
-            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
             <div className="absolute inset-0 -z-10">
                 <Image
                     src="reports/garage_sale3_tgcldb"
@@ -126,7 +125,6 @@ const SignupPage = async () => {
 
                         <CAPTCHASubmit
                             formId="credentials-signup-form"
-                            siteKey="6LfGSmMrAAAAAKtnGPlDg9PelJZssWyLTnxwD_iy"
                         />
 
                     </form>

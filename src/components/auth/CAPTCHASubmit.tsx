@@ -1,67 +1,74 @@
-"use client";
+"use client"
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 type Props = {
   formId: string;
-  siteKey: string;
 };
 
-const CAPTCHASubmit = ({ formId, siteKey }: Props) => {
+const CAPTCHASubmit = ({ formId }: Props) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const widgetIdRef = useRef<number | null>(null);
-  const [ready, setReady] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
-  // Load reCAPTCHA script and wait for grecaptcha to be available
   useEffect(() => {
-    const loadRecaptcha = () => {
-      return new Promise<void>((resolve) => {
-        if ((window as any).grecaptcha) {
-          resolve();
-        } else {
-          const script = document.createElement("script");
-          script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
-          script.async = true;
-          script.defer = true;
-          script.onload = () => resolve();
-          script.id = "recaptcha-script";
-          document.body.appendChild(script);
-        }
-      });
+    setHasMounted(true);
+
+    // Load reCAPTCHA script if not already present
+    if (!document.querySelector("#recaptcha-script")) {
+      const script = document.createElement("script");
+      script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+      script.async = true;
+      script.defer = true;
+      script.id = "recaptcha-script";
+      document.body.appendChild(script);
+    }
+
+    // Define the form submit callback
+    (window as any).onSubmit = () => {
+      const form = document.getElementById(formId) as HTMLFormElement | null;
+      if (form) {
+        form.requestSubmit();
+      } else {
+        console.error("Could not find form to submit!");
+      }
     };
 
-    const initRecaptcha = async () => {
-      await loadRecaptcha();
+    let interval: NodeJS.Timeout;
 
+    const checkAndRenderCaptcha = () => {
       const grecaptcha = (window as any).grecaptcha;
 
-      console.log(siteKey)
-
-      grecaptcha.ready(() => {
-        if (buttonRef.current && widgetIdRef.current === null) {
-          widgetIdRef.current = grecaptcha.render(buttonRef.current, {
-            sitekey: siteKey,
-            callback: () => {
-              const form = document.getElementById(formId) as HTMLFormElement | null;
-              if (form) form.requestSubmit();
-              else console.error("Form not found!");
-            },
-            badge: "inline",
-          });
-
-          setReady(true);
-        }
-      });
+      if (
+        grecaptcha &&
+        grecaptcha.render &&
+        buttonRef.current &&
+        widgetIdRef.current === null
+      ) {
+        widgetIdRef.current = grecaptcha.render(buttonRef.current, {
+          sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+          callback: "onSubmit",
+          badge: "inline",
+        });
+        clearInterval(interval);
+      }
     };
 
-    initRecaptcha();
-  }, [formId, siteKey]);
+    // Poll until grecaptcha is available
+    interval = setInterval(checkAndRenderCaptcha, 100);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [formId]);
+
+  if (!hasMounted) return null;
 
   return (
     <div className="captcha-wrapper mt-2 w-full">
       <button
         ref={buttonRef}
-        className="g-recaptcha cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+        className="g-recaptcha mt-2 cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition"
       >
         Sign Up
       </button>

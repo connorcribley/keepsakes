@@ -26,6 +26,10 @@ model User {
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
+  //Email Verification
+  verificationCode String? // For short codes (e.g., 6 digits)
+  codeExpiresAt  DateTime? // Optional: code expiration logic
+
   listings Listing[]
   reviews  Review[]
 

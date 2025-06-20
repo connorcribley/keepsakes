@@ -1,6 +1,9 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
+import GoogleSignIn from '@/components/auth/GoogleSignIn';
+import GithubSignIn from '@/components/auth/GithubSignIn';
+import FacebookSignIn from '@/components/auth/FacebookSignIn';
 
 
 
@@ -126,7 +129,7 @@ const SignupForm = () => {
                 setError(err.message || "Error resending code");
               }
             }}
-            className="mt-2 text-sm text-orange-400 hover:underline"
+            className="cursor-pointer mt-2 text-sm text-orange-400 hover:underline"
           >
             Re-send verification code
           </button>
@@ -136,62 +139,75 @@ const SignupForm = () => {
   }
 
   return (
+    <>
+      {/* Social Auth Buttons */}
+      < div className="flex justify-center gap-4" >
+        <GoogleSignIn />
+        <GithubSignIn />
+        <FacebookSignIn />
+      </div >
 
-    <form
-      id='credentials-signup-form'
-      className="space-y-4"
-    >
-      <div>
-        <label className="block text-sm text-gray-300 mb-1">Username</label>
-        <input
-          name="name"
-          type="text"
-          placeholder="John Doe"
-          required
-          autoComplete='name'
-          className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-        />
+      <div className="flex items-center gap-2">
+        <div className="flex-grow border-t border-gray-600" />
+        <span className="text-sm text-gray-400">or</span>
+        <div className="flex-grow border-t border-gray-600" />
       </div>
-
-      <div>
-        <label className="block text-sm text-gray-300 mb-1">Email</label>
-        <input
-          name='email'
-          type="email"
-          placeholder="johndoe@example.com"
-          required
-          autoComplete='email'
-          className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm text-gray-300 mb-1">Password</label>
-        <input
-          name='password'
-          type="password"
-          placeholder="••••••••"
-          required
-          autoComplete='current-password'
-          className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-        />
-      </div>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-
-      <button
-        type='submit'
-        className="g-recaptcha mt-2 cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition"
-        data-sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-        data-callback="onRecaptchaSuccess"
-        data-action="submit"
-        disabled={!grecaptchaReady}
+      
+      <form
+        id='credentials-signup-form'
+        className="space-y-4"
       >
-        {grecaptchaReady ? 'Sign Up' : 'Loading...'}
-      </button>
+        <div>
+          <label className="block text-sm text-gray-300 mb-1">Username</label>
+          <input
+            name="name"
+            type="text"
+            placeholder="John Doe"
+            required
+            autoComplete='name'
+            className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+          />
+        </div>
 
-    </form>
+        <div>
+          <label className="block text-sm text-gray-300 mb-1">Email</label>
+          <input
+            name='email'
+            type="email"
+            placeholder="johndoe@example.com"
+            required
+            autoComplete='email'
+            className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+          />
+        </div>
 
+        <div>
+          <label className="block text-sm text-gray-300 mb-1">Password</label>
+          <input
+            name='password'
+            type="password"
+            placeholder="••••••••"
+            required
+            autoComplete='current-password'
+            className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+          />
+        </div>
+
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
+        <button
+          type='submit'
+          className="g-recaptcha mt-2 cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+          data-sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+          data-callback="onRecaptchaSuccess"
+          data-action="submit"
+          disabled={!grecaptchaReady}
+        >
+          {grecaptchaReady ? 'Sign Up' : 'Loading...'}
+        </button>
+
+      </form>
+    </>
   );
 };
 

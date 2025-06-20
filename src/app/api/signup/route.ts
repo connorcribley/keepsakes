@@ -3,9 +3,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { signupSchema } from "@/lib/schema";
 import bcrypt from 'bcrypt';
-import { Resend } from 'resend';
+import sendVerificationCode from "@/utils/sendVerificationCode";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
     try {
@@ -65,12 +64,7 @@ export async function POST(req: Request) {
         });
 
         try {
-            await resend.emails.send({
-                from: 'onboarding@resend.dev',
-                to: validatedData.email,
-                subject: 'Keepsakes Verification Code',
-                html: `<p>Your verification code is: <strong>${verificationCode}</strong></p>`,
-            });
+            await sendVerificationCode(validatedData.email, verificationCode)
         } catch (err) {
             console.error(err)
             return NextResponse.json({ success: false, message: 'Email verification code could not be sent' }, { status: 500 })

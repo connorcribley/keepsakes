@@ -106,6 +106,30 @@ const SignupForm = () => {
           >
             Verify Email
           </button>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                const response = await fetch("/api/resend-code", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email }),
+                });
+
+                const result = await response.json();
+                if (!result.success) {
+                  setError(result.message || "Failed to resend code");
+                } else {
+                  alert("A new verification code has been sent.");
+                }
+              } catch (err: any) {
+                setError(err.message || "Error resending code");
+              }
+            }}
+            className="mt-2 text-sm text-orange-400 hover:underline"
+          >
+            Re-send verification code
+          </button>
         </form>
       </div>
     );

@@ -38,9 +38,6 @@ export async function POST(req: Request) {
             );
         }
 
-        console.log("Expires at:", user.codeExpiresAt);
-        console.log("Now:", new Date());
-
         if (user.verificationCode !== code) {
             return NextResponse.json(
                 { success: false, message: "Invalid verification code" },
@@ -50,7 +47,7 @@ export async function POST(req: Request) {
 
         if (user.codeExpiresAt < new Date()) {
             return NextResponse.json(
-                { success: false, message: "Verification code has expired" },
+                { success: false, message: "Verification code has expired, please send a new one" },
                 { status: 410 }
             );
         }

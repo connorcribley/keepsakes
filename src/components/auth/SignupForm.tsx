@@ -4,12 +4,14 @@ import React, { useEffect, useState } from 'react';
 import GoogleSignIn from '@/components/auth/GoogleSignIn';
 import GithubSignIn from '@/components/auth/GithubSignIn';
 import FacebookSignIn from '@/components/auth/FacebookSignIn';
+import { signIn } from "next-auth/react";
 
 
 
 const SignupForm = () => {
   const [step, setStep] = useState<'signup' | 'verify'>('signup');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [code, setCode] = useState("");
   const [error, setError] = useState('');
   const [grecaptchaReady, setGrecaptchaReady] = useState(false);
@@ -74,8 +76,16 @@ const SignupForm = () => {
       const result = await response.json();
 
       if (result.success) {
-        setStep("signup");
-        alert("Email successfully verified. You may now log in.");
+        // Automatically sign in the user
+        await signIn("credentials", {
+          email,
+          password,
+          redirect: true,
+          callbackUrl: "/",
+        }).catch(() => {
+          setError("Verification succeeded, but sign-in failed.");
+        });
+
       } else {
         setError(result.message || "Verification failed")
       }
@@ -152,13 +162,13 @@ const SignupForm = () => {
         <span className="text-sm text-gray-400">or</span>
         <div className="flex-grow border-t border-gray-600" />
       </div>
-      
+
       <form
         id='credentials-signup-form'
         className="space-y-4"
       >
         <div>
-          <label className="block text-sm text-gray-300 mb-1">Username</label>
+          <label className="block text-sm text-gray-300 mb-1">Display Name</label>
           <input
             name="name"
             type="text"
@@ -189,6 +199,8 @@ const SignupForm = () => {
             placeholder="••••••••"
             required
             autoComplete='current-password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
         </div>

@@ -81,7 +81,7 @@ const SignupForm = () => {
           email,
           password,
           redirect: true,
-          callbackUrl: "/",
+          redirectTo: "/",
         }).catch(() => {
           setError("Verification succeeded, but sign-in failed.");
         });
@@ -119,6 +119,7 @@ const SignupForm = () => {
           >
             Verify Email
           </button>
+          
           <button
             type="button"
             onClick={async () => {
@@ -219,6 +220,7 @@ const SignupForm = () => {
         </button>
 
       </form>
+      <a href="/login" className='cursor-pointer underline hover:text-orange-400'>Already have an account?</a>
     </>
   );
 };

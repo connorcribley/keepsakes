@@ -5,6 +5,7 @@ import { signupSchema } from "@/lib/schema";
 import bcrypt from 'bcrypt';
 import sendVerificationCode from "@/utils/sendVerificationCode";
 
+// TODO: Check if email already exists in database
 
 export async function POST(req: Request) {
     try {

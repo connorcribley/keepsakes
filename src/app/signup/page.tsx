@@ -1,6 +1,6 @@
 import Image from '@/components/Image';
 import SignupForm from '@/components/auth/SignupForm';
-import { auth, signIn } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 const SignupPage = async () => {
@@ -26,8 +26,6 @@ const SignupPage = async () => {
                 
                     {/* Form Inputs */}
                     <SignupForm />
-
-                    <a href="/login" className='cursor-pointer underline hover:text-orange-400'>Already have an account?</a>
                 </div>
             </div>
         </>

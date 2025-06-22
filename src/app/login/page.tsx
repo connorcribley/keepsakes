@@ -1,10 +1,8 @@
 import Image from '@/components/Image';
-import GoogleSignIn from '@/components/auth/GoogleSignIn';
-import GithubSignIn from '@/components/auth/GithubSignIn';
-import FacebookSignIn from '@/components/auth/FacebookSignIn';
-import { auth, signIn } from '@/lib/auth';
+
+import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import executeAction from '@/lib/executeAction';
+import LoginForm from '@/components/auth/LoginForm';
 
 const LoginPage = async () => {
     const session = await auth();
@@ -26,64 +24,7 @@ const LoginPage = async () => {
                 <div className="bg-zinc-900 text-white w-full mx-auto p-8 rounded-2xl shadow-lg space-y-6 border border-gray-700 max-w-sm sm:max-w-md">
                     <h2 className="text-2xl font-bold text-center">Login to Keepsakes</h2>
 
-                    {/* Social Auth Buttons */}
-                    <div className="flex justify-center gap-4">
-                        <GoogleSignIn />
-                        <GithubSignIn />
-                        <FacebookSignIn />
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <div className="flex-grow border-t border-gray-600" />
-                        <span className="text-sm text-gray-400">or</span>
-                        <div className="flex-grow border-t border-gray-600" />
-                    </div>
-
-                    {/* Form Inputs */}
-                    <form
-                        className="space-y-4"
-                        action={async (formData: FormData) => {
-                            "use server";
-                            await executeAction({
-                                actionFn: async () => {
-                                    await signIn('credentials', formData)
-                                }
-                            })
-                        }}
-                    >
-
-                        <div>
-                            <label className="block text-sm text-gray-300 mb-1">Email</label>
-                            <input
-                                name='email'
-                                type="email"
-                                placeholder="johndoe@example.com"
-                                required
-                                autoComplete='email'
-                                className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm text-gray-300 mb-1">Password</label>
-                            <input
-                                name='password'
-                                type="password"
-                                placeholder="••••••••"
-                                required
-                                autoComplete='current-password'
-                                className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            className="cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition mt-2"
-                        >
-                            Login
-                        </button>
-                    </form>
-                    <a href="/signup" className='cursor-pointer underline hover:text-orange-400'>New to Keepsakes?</a>
+                    <LoginForm />
                 </div>
             </div>
         </>

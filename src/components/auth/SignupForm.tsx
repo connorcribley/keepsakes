@@ -115,7 +115,7 @@ const SignupForm = () => {
 
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+            className="cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition mt-2"
           >
             Verify Email
           </button>
@@ -140,7 +140,7 @@ const SignupForm = () => {
                 setError(err.message || "Error resending code");
               }
             }}
-            className="cursor-pointer mt-2 text-sm text-orange-400 hover:underline"
+            className="cursor-pointer underline hover:text-orange-400"
           >
             Re-send verification code
           </button>

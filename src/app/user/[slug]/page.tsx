@@ -10,7 +10,7 @@ import { notFound } from "next/navigation";
 
 type Props = {
     params: {
-        userId: string;
+        slug: string;
     };
 }
 
@@ -21,12 +21,12 @@ const UserPage = async ({ params }: Props) => {
     // const [itemsOpen, setItemsOpen] = useState(true);
     // const [commentsOpen, setCommentsOpen] = useState(true);
 
-    const { userId } = await params;
-
     const session = await auth();
 
+    const { slug } = await params;
+
     const user = await prisma.user.findUnique({
-        where: { id: userId },
+        where: { slug },
     })
 
     if (!user) notFound();
@@ -80,7 +80,7 @@ const UserPage = async ({ params }: Props) => {
                                 </div>
 
                                 <div className="flex flex-col">
-                                    <h2 className="text-2xl font-bold">{user.name}</h2>
+                                    <h1 className="text-2xl font-bold">{user.name}</h1>
                                     <div className="flex items-center">
                                         <MapPin size={20} className="text-orange-400 mr-2" />
                                         <p className="text-sm text-orange-400">New York, NY</p>

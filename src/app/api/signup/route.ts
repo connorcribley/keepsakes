@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { signupSchema } from "@/lib/schema";
 import bcrypt from 'bcrypt';
 import sendVerificationCode from "@/utils/sendVerificationCode";
+import generateUniqueSlug from "@/utils/generateUniqueSlug";
 
 // TODO: Check if email already exists in database
 
@@ -51,12 +52,16 @@ export async function POST(req: Request) {
         // Email verification code
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
+        // Generate slug
+        const slug = await generateUniqueSlug(validatedData.name);
+
         // Push to User table in DB
         await prisma.user.create({
             data: {
                 name: validatedData.name,
                 email: validatedData.email,
                 password: hashedPassword,
+                slug,
                 image: 'https://res.cloudinary.com/dx83fnzoj/image/upload/v1750111768/user_profiles/default-pfp_wm30df.svg',
                 emailVerified: null,
                 verificationCode,

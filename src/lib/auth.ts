@@ -10,6 +10,7 @@ import { loginSchema } from "./schema"
 import { v4 as uuid } from "uuid"
 import { encode } from "next-auth/jwt"
 import bcrypt from "bcrypt"
+import generateUniqueSlug from "@/utils/generateUniqueSlug"
 
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -113,9 +114,15 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     imageUrl = uploadResult.secure_url;
                 }
 
+                // Generate slug from user's name
+                const slug = await generateUniqueSlug(user.name || "user");
+
                 await prisma.user.update({
                     where: { id: user.id },
-                    data: { image: imageUrl },
+                    data: { 
+                        image: imageUrl,
+                        slug 
+                    },
                 });
 
 

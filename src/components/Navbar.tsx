@@ -5,10 +5,20 @@ import Image from '@/components/Image';
 import { MapPinned, List, UserCircle2 } from 'lucide-react';
 import FloatingNavMenu from './FloatingNavMenu';
 import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import LogOut from './auth/LogOut';
+import { userAgent } from 'next/server';
 
 const Navbar = async () => {
   const session = await auth();
+
+  let user: { slug: string | null; image: string | null } | null = null;
+  if (session?.user?.id) {
+    user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { slug: true, image: true },
+  });
+  }
 
   return (
     <nav className="sticky relative top-0 bg-black text-white px-6 py-2 shadow-md z-50">
@@ -41,13 +51,13 @@ const Navbar = async () => {
 
 
         {/* Desktop Auth Links */}
-        {session && session.user ? (
+        {session && session.user && user?.slug ? (
           <div className="flex space-x-3 font-medium items-center">  {/* Delete this later */}
             <LogOut />
-            <Link href={`/user/${session.user.id}`} className="hover:text-orange-400 transition">
-              {session.user.image ? (
+            <Link href={`/user/${user.slug}`} className="hover:text-orange-400 transition">
+              {user?.image || session.user.image ? (
                 <img
-                  src={session.user.image}
+                  src={user.image ?? session.user.image ?? undefined}
                   alt="Logo"
                   width={40}
                   height={40}

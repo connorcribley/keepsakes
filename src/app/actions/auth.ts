@@ -1,10 +1,10 @@
 "use server";
 
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
 import { signIn, signOut } from "@/lib/auth";
-import executeAction from "@/lib/executeAction"
-import { prisma } from "@/lib/prisma";
-import { signupSchema } from "@/lib/schema";
+// import executeAction from "@/lib/executeAction"
+// import { prisma } from "@/lib/prisma";
+// import { signupSchema } from "@/lib/schema";
 
 const loginGoogle = async () => {
     await signIn("google");
@@ -22,7 +22,7 @@ const logout = async () => {
     await signOut();
 }
 
-const signUp = async (formData: FormData) => {
+/* const signUp = async (formData: FormData) => {
     try {
     const name = formData.get("name");
     const email = formData.get("email");
@@ -92,6 +92,6 @@ const signupAction = async (formData: FormData) => {
         console.error("Signup failed:", res.message);
         throw new Error("Signup failed");
     }
-}
+} */
 
-export { loginGoogle, loginGithub, loginFacebook, logout, signUp, signupAction };
+export { loginGoogle, loginGithub, loginFacebook, logout, /* signUp, signupAction */ };

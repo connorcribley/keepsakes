@@ -17,6 +17,7 @@ datasource db {
 model User {
   id            String          @id @default(cuid())
   name          String
+  slug          String?         @unique
   email         String          @unique
   password      String?
   emailVerified DateTime?
@@ -27,8 +28,8 @@ model User {
   Authenticator Authenticator[]
 
   //Email Verification
-  verificationCode String? // For short codes (e.g., 6 digits)
-  codeExpiresAt  DateTime? // Optional: code expiration logic
+  verificationCode String?
+  codeExpiresAt    DateTime?
 
   listings Listing[]
   reviews  Review[]

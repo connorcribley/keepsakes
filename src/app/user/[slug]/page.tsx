@@ -6,6 +6,8 @@ import Listing from "@/components/Listing";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { MessageCircle } from "lucide-react";
+import Link from "next/link";
 
 
 type Props = {
@@ -14,12 +16,7 @@ type Props = {
     };
 }
 
-
-
 const UserPage = async ({ params }: Props) => {
-    // const [isModalOpen, setIsModalOpen] = useState(false);
-    // const [itemsOpen, setItemsOpen] = useState(true);
-    // const [commentsOpen, setCommentsOpen] = useState(true);
 
     const session = await auth();
 
@@ -61,7 +58,6 @@ const UserPage = async ({ params }: Props) => {
                             <div className="flex items-center gap-4">
                                 <div
                                     className="w-[100px] h-[100px] rounded-full overflow-hidden cursor-pointer"
-                                /* onClick={() => setIsModalOpen(true)} */
                                 >
                                     {user.image ? (
                                         <Image
@@ -87,6 +83,16 @@ const UserPage = async ({ params }: Props) => {
                                     </div>
                                     <p className="text-sm text-gray-400">Joined June 2025</p>
                                 </div>
+
+                                {session?.user?.id && session.user.id !== user.id && (
+                                    <Link
+                                        href={`/messages/${user.slug}`}
+                                        className="ml-2 text-gray-400 hover:text-orange-400 transition"
+                                        title="Send Direct Message"
+                                    >
+                                        <MessageCircle className="w-6 h-6" />
+                                    </Link>
+                                )}
                             </div>
 
                             <p className="text-sm mt-3 text-gray-300">
@@ -99,20 +105,17 @@ const UserPage = async ({ params }: Props) => {
                     {/* Toggle Item List */}
                     <div
                         className="flex items-center justify-start cursor-pointer select-none"
-                    /* onClick={() => setItemsOpen(prev => !prev)} */
                     >
                         <h1 className="text-xl font-semibold text-gray-200 my-2">
                             Previous Listings <span>(3)</span>
                         </h1>
-                        {/* {itemsOpen ? ( */}
+
                         <ChevronUp size={30} className="mx-2 text-gray-400" />
-                        {/* ) : (
-                            <ChevronDown size={30} className="mx-2 text-gray-400" />
-                        )} */}
+
                     </div>
 
                     {/* Conditionally render item list */}
-                    {/* {itemsOpen && ( */}
+
                     <div className="overflow-y-auto pr-2 rounded-2xl transition-all duration-300 ease-in-out">
                         <div className="flex flex-col gap-3">
                             <Listing />
@@ -120,26 +123,21 @@ const UserPage = async ({ params }: Props) => {
                             <Listing />
                         </div>
                     </div>
-                    {/* )} */}
+
                 </div>
 
                 {/* Reviews */}
                 <div className="my-5 w-full lg:w-[400px] flex-shrink-0">
                     <div
                         className="flex items-center justify-start cursor-pointer select-none mb-4"
-                    /* onClick={() => setCommentsOpen(prev => !prev)} */
                     >
                         <h1 className="text-xl font-semibold text-gray-200">
                             Reviews Left <span>({dummyComments.length})</span>
                         </h1>
-                        {/* {commentsOpen ? ( */}
                         <ChevronUp size={30} className="mx-2 text-gray-400" />
-                        {/* ) : (
-                            <ChevronDown size={30} className="mx-2 text-gray-400" />
-                        )} */}
                     </div>
 
-                    {/* {commentsOpen && ( */}
+
                     <div className="space-y-2">
                         {dummyComments.map((review, index) => (
                             <div key={index} className="border border-gray-700 rounded-xl p-4 bg-zinc-900 text-gray-200 shadow space-y-3">
@@ -161,33 +159,10 @@ const UserPage = async ({ params }: Props) => {
                             </div>
                         ))}
                     </div>
-                    {/* )} */}
+
                 </div>
             </div>
 
-            {/* Modal */}
-            {/* {isModalOpen && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
-                    onClick={() => setIsModalOpen(false)}
-                >
-                    <div className="relative" onClick={(e) => e.stopPropagation()}>
-                        <button
-                            className="absolute -top-4 -right-4 bg-white text-black rounded-full p-1 "
-                            onClick={() => setIsModalOpen(false)}
-                        >
-                            <X size={20} />
-                        </button>
-                        <Image
-                            src="listings/house9_xhspdp"
-                            alt="Enlarged garage sale house"
-                            width={800}
-                            height={600}
-                            className="rounded-lg max-w-full max-h-[90vh] object-contain"
-                        />
-                    </div>
-                </div>
-            )} */}
         </div>
     )
 };

@@ -1,5 +1,3 @@
-'use server';
-
 import Link from 'next/link';
 import Image from '@/components/Image';
 import { MapPinned, List, UserCircle2 } from 'lucide-react';
@@ -15,9 +13,9 @@ const Navbar = async () => {
   let user: { slug: string | null; image: string | null } | null = null;
   if (session?.user?.id) {
     user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { slug: true, image: true },
-  });
+      where: { id: session.user.id },
+      select: { slug: true, image: true },
+    });
   }
 
   return (

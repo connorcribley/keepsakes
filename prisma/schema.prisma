@@ -167,6 +167,7 @@ model DirectMessage {
 model Conversation {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
+  updatedAt DateTime?
 
   participant1Id String
   participant2Id String

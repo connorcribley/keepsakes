@@ -2,33 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { DirectMessage } from "@prisma/client";
-import clsx from "clsx";
 import { sendMessage } from "@/app/actions/messages";
-
-interface MessageBubbleProps {
-    content: string;
-    isSender: boolean;
-    createdAt: Date;
-}
-
-const MessageBubble = ({ content, isSender, createdAt }: MessageBubbleProps) => (
-    <div className={clsx("flex", isSender ? "justify-end" : "justify-start")}>
-        <div
-            className={clsx(
-                "rounded-xl px-4 py-2 max-w-[75%] text-sm shadow",
-                isSender ? "bg-orange-500 text-white" : "bg-zinc-800 text-gray-200"
-            )}
-        >
-            <p>{content}</p>
-            <span className="text-[10px] block text-right opacity-60 mt-1">
-                {new Date(createdAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                })}
-            </span>
-        </div>
-    </div>
-);
+import MessageBubble from "./MessageBubble";
 
 interface MessageThreadProps {
     messages: DirectMessage[];
@@ -41,6 +16,7 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
     const [newMessage, setNewMessage] = useState("");
     const [messageList, setMessageList] = useState(messages);
     const scrollRef = useRef<HTMLDivElement | null>(null);
+    const [activeId, setActiveId] = useState<string | null>(null);
 
     useEffect(() => {
         scrollRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -69,9 +45,14 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
                 {messageList.map((msg) => (
                     <MessageBubble
                         key={msg.id}
+                        id={msg.id}
                         content={msg.content}
                         isSender={msg.senderId === userId}
                         createdAt={msg.createdAt}
+                        onEdit={(id) => console.log("Edit", id)}
+                        onDelete={(id) => console.log("Delete", id)}
+                        activeId={activeId}
+                        setActiveId={setActiveId}
                     />
                 ))}
                 <div ref={scrollRef} />

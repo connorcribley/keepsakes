@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { MoreHorizontal } from "lucide-react";
+import MessageDeleteModal from "./MessageDeleteModal";
 
 
 interface MessageBubbleProps {
@@ -28,19 +29,28 @@ const MessageBubble = ({
 }: MessageBubbleProps) => {
     const isActive = activeId === id;
     const containerRef = useRef<HTMLDivElement>(null);
-
-
+    const menuRef = useRef<HTMLDivElement>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false); // ← Modal state
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(e.target as Node)
+            ) {
                 setActiveId(null);
             }
+        };
+
+        if (isActive) {
+            document.addEventListener("mousedown", handleClickOutside);
         }
 
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside)
-    }, [setActiveId]);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isActive, setActiveId]);
+
 
     return (
         <div
@@ -70,8 +80,9 @@ const MessageBubble = ({
                 )}
                 {/* Floating menu */}
                 {isSender && isActive && (
-                    <div 
-                    className="absolute top-8 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
+                    <div
+                        ref={menuRef}
+                        className="absolute top-8 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
                     >
                         <button
                             onClick={() => onEdit(id)}
@@ -80,7 +91,9 @@ const MessageBubble = ({
                             Edit
                         </button>
                         <button
-                            onClick={() => onDelete(id)}
+                            onClick={() => {
+                                setShowDeleteModal(true)
+                            }}
                             className="hover:text-red-500 text-left cursor-pointer"
                         >
                             Delete
@@ -96,6 +109,16 @@ const MessageBubble = ({
                         minute: "2-digit",
                     })}
                 </span>
+
+                <MessageDeleteModal
+                    isOpen={showDeleteModal}
+                    onClose={() => setShowDeleteModal(false)}
+                    onConfirm={async () => {
+                        await onDelete(id);          // ← Call parent delete handler
+                        setShowDeleteModal(false); // Close modal
+                        setActiveId(null);         // Close menu
+                    }}
+                />
             </div>
         </div>
     )

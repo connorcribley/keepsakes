@@ -61,3 +61,21 @@ export async function sendMessage({ content, recipientId, conversationId }: Send
 
     return message;
 }
+
+export async function deleteMessage(messageId: string) {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
+
+
+    const message = await prisma.directMessage.findUnique({
+        where: { id: messageId },
+    });
+
+    if (!message || message.senderId !== session.user.id) {
+        throw new Error("Forbidden");
+    }
+
+    await prisma.directMessage.delete({
+        where: { id: messageId },
+    });
+}

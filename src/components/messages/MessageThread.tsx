@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { DirectMessage } from "@prisma/client";
 import { sendMessage } from "@/app/actions/messages";
 import MessageBubble from "./MessageBubble";
+import { deleteMessage } from "@/app/actions/messages";
 
 interface MessageThreadProps {
     messages: DirectMessage[];
@@ -38,6 +39,15 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
         }
     };
 
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteMessage(id); // your server action or API call
+            setMessageList((prev) => prev.filter((msg) => msg.id !== id));
+        } catch (err) {
+            console.error("Failed to delete message:", err);
+        }
+    };
+
     return (
         <div className="flex flex-col h-full">
             {/* Scrollable Messages */}
@@ -50,7 +60,7 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
                         isSender={msg.senderId === userId}
                         createdAt={msg.createdAt}
                         onEdit={(id) => console.log("Edit", id)}
-                        onDelete={(id) => console.log("Delete", id)}
+                        onDelete={handleDelete}
                         activeId={activeId}
                         setActiveId={setActiveId}
                     />

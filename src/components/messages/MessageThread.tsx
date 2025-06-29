@@ -32,12 +32,36 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
 
     const handleSend = async () => {
         const trimmed = newMessage.trim();
-        if (!trimmed) return;
+        if (!trimmed && attachments.length === 0) return;
+
+        let attachmentUrls: string[] = [];
+
+        if (attachments.length > 0) {
+            const formData = new FormData();
+
+            attachments.forEach((file) => {
+                formData.append("attachments", file);
+            });
+
+            const res = await fetch("/api/attachments/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) {
+                console.error("Upload failed");
+                return;
+            }
+
+            const data = await res.json();
+            attachmentUrls = data.urls;
+        }
 
         const newMsg = await sendMessage({
-            content: trimmed,
+            content: trimmed || "[Attachment]",
             recipientId,
             conversationId,
+            attachmentUrls,
         });
 
         if (newMsg) {
@@ -119,6 +143,7 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
                                 content={msg.content}
                                 isSender={msg.senderId === userId}
                                 createdAt={msg.createdAt}
+                                attachmentUrls={msg.attachmentUrls}
                                 onEdit={handleEditClick}
                                 onDelete={handleDelete}
                                 activeId={activeId}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { auth } from "@/lib/auth";
+import { Readable } from "stream";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
@@ -11,41 +12,38 @@ cloudinary.config({
 
 export async function POST(req: NextRequest) {
     const session = await auth();
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 })
     };
 
+
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const files = formData.getAll("attachments") as File[];
 
+    const uploadPromises = files.map(async (file) => {
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
 
-    if (!file) {
-        return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
-    }
+        return new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    folder: "private_dm_attachments",
+                    resource_type: "auto",
+                    type: "authenticated", // disables public access
+                },
+                (err, result) => {
+                    if (err || !result) return reject(err);
+                    resolve(result.secure_url);
+                }
+            );
+
+            Readable.from(buffer).pipe(uploadStream);
+        });
+    });
 
     try {
-        const buffer = Buffer.from(await file.arrayBuffer());
-
-        const uploadResult = await cloudinary.uploader.upload_stream(
-            {
-                folder: "direct_messages",
-                resource_type: "auto",
-                use_filename: true,
-                unique_filename: false,
-                access_mode: "authenticated",
-            },
-            (error, result) => {
-                if (error || !result) {
-                    throw new Error(error?.message || "Cloudinary upload failed");
-                }
-
-                // send result as response
-                return NextResponse.json({ url: result.secure_url, public_id: result.public_id });
-            }
-        );
-
-        const passthrough = uploadResult as NodeJS.WritableStream;
-        passthrough.end(buffer);
+        const urls = await Promise.all(uploadPromises);
+        return NextResponse.json({ urls });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: "Upload failed" }, { status: 500 });

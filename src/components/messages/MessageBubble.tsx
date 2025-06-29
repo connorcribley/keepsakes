@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { MoreHorizontal } from "lucide-react";
 import WarningModal from "../floating/WarningModal";
+import { FileText } from "lucide-react";
 
 
 interface MessageBubbleProps {
@@ -11,6 +12,7 @@ interface MessageBubbleProps {
     content: string;
     isSender: boolean;
     createdAt: Date;
+    attachmentUrls?: string[];
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
     activeId: string | null;
@@ -22,6 +24,7 @@ const MessageBubble = ({
     content,
     isSender,
     createdAt,
+    attachmentUrls = [],
     onEdit,
     onDelete,
     activeId,
@@ -53,79 +56,117 @@ const MessageBubble = ({
 
 
     return (
-        <div
-            ref={containerRef}
-            className={clsx("relative flex", isSender ? "justify-end" : "justify-start")}
-        >
-            <div
-                className={clsx(
-                    "flex flex-col rounded-xl px-4 py-2 max-w-[75%] text-sm shadow break-words whitespace-pre-wrap overflow-x-hidden",
-                    isSender ? "bg-orange-500 text-white" : "bg-zinc-800 text-gray-200"
-                )}
-            >
-                {/* Ellipses */}
-                {isSender && (
-                    <div className="flex justify-between space-x-2 my-1 mr-1">
-                        <span className="text-[13px] block text-right opacity-60">
-                            {new Date(createdAt).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
-                        </span>
-                        <button
-                            aria-label="More options"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveId(isActive ? null : id);
-                            }}
-                            className="text-white hover:text-gray-300 focus:outline-none cursor-pointer"
-                        >
-                            <MoreHorizontal size={20} />
-                        </button>
-                    </div>
-                )}
-                {/* Floating menu */}
-                {isSender && isActive && (
+        <>
+            {content && content !== "[Attachment]" && (
+                <div
+                    ref={containerRef}
+                    className={clsx("relative flex", isSender ? "justify-end" : "justify-start")}
+                >
+
                     <div
-                        ref={menuRef}
-                        className="absolute top-8 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
+                        className={clsx(
+                            "flex flex-col rounded-xl px-4 py-2 max-w-[75%] text-sm shadow break-words whitespace-pre-wrap overflow-x-hidden",
+                            isSender ? "bg-orange-500 text-white" : "bg-zinc-800 text-gray-200"
+                        )}
                     >
-                        <button
-                            onClick={() => onEdit(id)}
-                            className="hover:text-orange-400 text-left cursor-pointer"
-                        >
-                            Edit
-                        </button>
-                        <button
-                            onClick={() => {
-                                setShowDeleteModal(true)
+                        {/* Ellipses */}
+                        {isSender && (
+                            <div className="flex justify-between space-x-2 my-1 mr-1">
+                                <span className="text-[13px] block text-right opacity-60">
+                                    {new Date(createdAt).toLocaleTimeString([], {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    })}
+                                </span>
+                                <button
+                                    aria-label="More options"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveId(isActive ? null : id);
+                                    }}
+                                    className="text-white hover:text-gray-300 focus:outline-none cursor-pointer"
+                                >
+                                    <MoreHorizontal size={20} />
+                                </button>
+                            </div>
+                        )}
+                        {/* Floating menu */}
+                        {isSender && isActive && (
+                            <div
+                                ref={menuRef}
+                                className="absolute top-8 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
+                            >
+                                <button
+                                    onClick={() => onEdit(id)}
+                                    className="hover:text-orange-400 text-left cursor-pointer"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowDeleteModal(true)
+                                    }}
+                                    className="hover:text-red-500 text-left cursor-pointer"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Content and Date */}
+                        <p className="my-1">{content}</p>
+
+
+                        <WarningModal
+                            isOpen={showDeleteModal}
+                            onClose={() => setShowDeleteModal(false)}
+                            onConfirm={async () => {
+                                await onDelete(id);          // ← Call parent delete handler
+                                setShowDeleteModal(false); // Close modal
+                                setActiveId(null);         // Close menu
                             }}
-                            className="hover:text-red-500 text-left cursor-pointer"
-                        >
-                            Delete
-                        </button>
+                            title="Delete Message"
+                            content="Do you really want to delete this message?"
+                            closeText="Cancel"
+                            confirmText="Delete"
+                        />
                     </div>
-                )}
+                </div>
+            )}
 
-                {/* Content and Date */}
-                <p className="my-1">{content}</p>
+            {attachmentUrls && attachmentUrls.length > 0 && attachmentUrls.map((url, index) => {
+                const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
+                const isPDF = url.endsWith(".pdf");
+                const fileName = decodeURIComponent(url.split("/").pop() || "file");
+                
+                return (
+                    <div
+                        key={`${id}-attachment-${index}`}
+                        className={clsx("flex mb-1", isSender ? "justify-end" : "justify-start")}
+                    >
+                        {isImage && (
+                            <img
+                                src={url}
+                                alt={`attachment-${index}`}
+                                className="max-w-xs rounded-lg shadow"
+                            />
+                        )}
 
-
-                <WarningModal
-                    isOpen={showDeleteModal}
-                    onClose={() => setShowDeleteModal(false)}
-                    onConfirm={async () => {
-                        await onDelete(id);          // ← Call parent delete handler
-                        setShowDeleteModal(false); // Close modal
-                        setActiveId(null);         // Close menu
-                    }}
-                    title="Delete Message"
-                    content="Do you really want to delete this message?"
-                    closeText="Cancel"
-                    confirmText="Delete"
-                />
-            </div>
-        </div>
+                        {isPDF && (
+                            <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow bg-zinc-700 text-white max-w-[75%] hover:bg-zinc-600"
+                            >
+                                <FileText size={20} />
+                                <span className="truncate">{fileName}</span>
+                            </a>
+                        )}
+                    </div>
+                );
+            })}
+        </>
     )
 };
 

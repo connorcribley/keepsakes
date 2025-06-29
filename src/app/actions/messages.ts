@@ -7,9 +7,15 @@ interface SendMessageProps {
     content: string;
     recipientId: string;
     conversationId: string | null;
+    attachmentUrls?: string[];
 }
 
-export async function sendMessage({ content, recipientId, conversationId }: SendMessageProps) {
+export async function sendMessage({
+    content,
+    recipientId,
+    conversationId,
+    attachmentUrls = [],
+}: SendMessageProps) {
     const session = await auth();
 
     if (!session?.user?.id) return null;
@@ -27,23 +33,20 @@ export async function sendMessage({ content, recipientId, conversationId }: Send
             },
         });
 
-        if (existing) {
-            convoId = existing.id;
-        } else {
-            const newConversation = await prisma.conversation.create({
+        convoId = existing?.id ?? (
+            await prisma.conversation.create({
                 data: {
                     participant1Id: senderId,
                     participant2Id: recipientId,
                 },
-            });
-
-            convoId = newConversation.id;
-        }
+            })
+        ).id;
     }
 
     const message = await prisma.directMessage.create({
         data: {
             content,
+            attachmentUrls,
             senderId,
             recipientId,
             conversationId: convoId,

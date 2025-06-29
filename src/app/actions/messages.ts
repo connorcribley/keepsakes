@@ -2,7 +2,6 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
 
 interface SendMessageProps {
     content: string;
@@ -56,9 +55,6 @@ export async function sendMessage({ content, recipientId, conversationId }: Send
         data: { updatedAt: new Date() },
     });
 
-    // revalidatePath(`/messages`);
-    // revalidatePath(`/messages/${session.user.slug}`);
-
     return message;
 }
 
@@ -77,5 +73,23 @@ export async function deleteMessage(messageId: string) {
 
     await prisma.directMessage.delete({
         where: { id: messageId },
+    });
+}
+
+export async function updateMessage(messageId: string, messageContent: string) {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
+
+    const message = await prisma.directMessage.findUnique({
+        where: { id: messageId },
+    });
+
+    if (!message || message.senderId !== session.user.id) {
+        throw new Error("Forbidden");
+    }
+
+    return await prisma.directMessage.update({
+        where: { id: messageId },
+        data: { content: messageContent },
     });
 }

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { MoreHorizontal } from "lucide-react";
-import MessageDeleteModal from "./MessageDeleteModal";
+import WarningModal from "../floating/WarningModal";
 
 
 interface MessageBubbleProps {
@@ -30,7 +30,7 @@ const MessageBubble = ({
     const isActive = activeId === id;
     const containerRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false); // ← Modal state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -59,13 +59,19 @@ const MessageBubble = ({
         >
             <div
                 className={clsx(
-                    "flex flex-col rounded-xl px-4 py-2 max-w-[75%] text-sm shadow",
+                    "flex flex-col rounded-xl px-4 py-2 max-w-[75%] text-sm shadow break-words whitespace-pre-wrap overflow-x-hidden",
                     isSender ? "bg-orange-500 text-white" : "bg-zinc-800 text-gray-200"
                 )}
             >
                 {/* Ellipses */}
                 {isSender && (
-                    <div className="flex justify-end my-1 mr-1">
+                    <div className="flex justify-between space-x-2 my-1 mr-1">
+                        <span className="text-[13px] block text-right opacity-60">
+                            {new Date(createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}
+                        </span>
                         <button
                             aria-label="More options"
                             onClick={(e) => {
@@ -102,15 +108,10 @@ const MessageBubble = ({
                 )}
 
                 {/* Content and Date */}
-                <p>{content}</p>
-                <span className="text-[10px] block text-right opacity-60 mt-1">
-                    {new Date(createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    })}
-                </span>
+                <p className="my-1">{content}</p>
 
-                <MessageDeleteModal
+
+                <WarningModal
                     isOpen={showDeleteModal}
                     onClose={() => setShowDeleteModal(false)}
                     onConfirm={async () => {
@@ -118,6 +119,10 @@ const MessageBubble = ({
                         setShowDeleteModal(false); // Close modal
                         setActiveId(null);         // Close menu
                     }}
+                    title="Delete Message"
+                    content="Do you really want to delete this message?"
+                    closeText="Cancel"
+                    confirmText="Delete"
                 />
             </div>
         </div>

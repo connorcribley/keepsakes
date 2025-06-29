@@ -3,14 +3,25 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
-interface MessageDeleteModalProps {
+interface WarningModalProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
+    title: string | null;
+    content: string | null;
+    closeText: string | null;
+    confirmText: string | null;
 }
 
-
-const MessageDeleteModal = ({ isOpen, onClose, onConfirm }: MessageDeleteModalProps) => {
+const WarningModal = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    content,
+    closeText,
+    confirmText
+}: WarningModalProps) => {
     const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -44,20 +55,20 @@ const MessageDeleteModal = ({ isOpen, onClose, onConfirm }: MessageDeleteModalPr
                 ref={modalRef}
                 className="bg-zinc-900 text-white p-6 rounded-lg shadow-lg w-[90%] max-w-md"
             >
-                <h2 className="text-xl font-semibold mb-4">Delete Message</h2>
-                <p className="mb-6">Do you really want to delete this message?</p>
+                <h2 className="text-xl font-semibold mb-4">{title}</h2>
+                <p className="mb-6">{content}</p>
                 <div className="flex justify-end space-x-3">
                     <button
                         onClick={onClose}
                         className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
                     >
-                        Cancel
+                        {closeText}
                     </button>
                     <button
                         onClick={onConfirm}
                         className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white"
                     >
-                        Delete
+                        {confirmText}
                     </button>
                 </div>
             </div>
@@ -66,4 +77,4 @@ const MessageDeleteModal = ({ isOpen, onClose, onConfirm }: MessageDeleteModalPr
     )
 }
 
-export default MessageDeleteModal;
+export default WarningModal;

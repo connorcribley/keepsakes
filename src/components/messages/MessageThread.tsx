@@ -20,10 +20,11 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
     const [activeId, setActiveId] = useState<string | null>(null);
     const [editId, setEditId] = useState<string | null>(null);
     const [showCancelEditModal, setShowCancelEditModal] = useState(false);
+
     const [attachments, setAttachments] = useState<File[]>([]);
+    const [existingAttachments, setExistingAttachments] = useState<string[]>([]); // ← NEW
+
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -73,18 +74,40 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
 
     const handleEdit = async () => {
         if (!editId) return;
+
         const trimmed = newMessage.trim();
-        if (!trimmed) return;
+        if (!trimmed && attachments.length === 0 && existingAttachments.length === 0) return;
 
+        let uploadedUrls: string[] = [];
 
-        const updatedMsg = await updateMessage(editId, trimmed);
+        if (attachments.length > 0) {
+            const formData = new FormData();
+            attachments.forEach((file) => formData.append("attachments", file));
+
+            const res = await fetch("/api/attachments/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) {
+                console.error("Upload failed");
+                return;
+            }
+
+            const data = await res.json();
+            uploadedUrls = data.urls;
+        }
+
+        const updatedMsg = await updateMessage(editId, trimmed, [...existingAttachments, ...uploadedUrls]);
+
         if (updatedMsg) {
             setMessageList((prev) =>
-                prev.map((msg) => (msg.id === editId ? { ...msg, content: trimmed } : msg))
+                prev.map((msg) => (msg.id === editId ? { ...msg, content: trimmed, attachmentUrls: [...existingAttachments, ...uploadedUrls] } : msg))
             );
             setNewMessage("");
             setEditId(null);
             setAttachments([]);
+            setExistingAttachments([]);
         }
 
     }
@@ -95,12 +118,16 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
 
         setEditId(id);
         setNewMessage(msg.content);
+        setExistingAttachments(msg.attachmentUrls || []);
+        setAttachments([]);
         setActiveId(null);
     };
 
     const handleCancelEdit = () => {
         setEditId(null);
         setNewMessage("");
+        setAttachments([]);
+        setExistingAttachments([]);
     };
 
     const handleDelete = async (id: string) => {
@@ -157,11 +184,35 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
 
             {/* Input Fixed at Bottom */}
             <div className="p-2 border-t border-zinc-800 bg-zinc-900">
-                {attachments.length > 0 && (
+                {(existingAttachments.length > 0 || attachments.length > 0) && (
                     <div className="flex flex-col">
-                        <h2 className="text-sm font-semibold text-gray-300 mb-1">Attachments ({attachments.length}):</h2>
+                        <h2 className="text-sm font-semibold text-gray-300 mb-1">
+                            Attachments ({existingAttachments.length + attachments.length}):
+                        </h2>
                         <div className="flex overflow-x-auto gap-2 mb-2 px-1">
-
+                            {/* Existing attachments (Edit)*/}
+                            {existingAttachments.map((url, index) => (
+                                <div key={`existing-${index}`} className="relative w-16 h-16 flex-shrink-0 border rounded bg-zinc-700 p-1">
+                                    {url.match(/\.(jpeg|jpg|png|gif|webp)$/i) ? (
+                                        <img src={url} alt="existing" className="object-cover w-full h-full rounded" />
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center text-xs text-white truncate">
+                                            <FileText size={30} className="mt-1" />
+                                            {url.split("/").pop()}
+                                        </div>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setExistingAttachments((prev) => prev.filter((_, i) => i !== index))
+                                        }
+                                        className="cursor-pointer absolute top-0 right-0 bg-black bg-opacity-60 text-white hover:text-orange-500 text-sm rounded-full w-6 h-6 flex items-center justify-center"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                            ))}
+                            {/* Added attachments (Send or Edit) */}
                             {attachments.map((file, index) => (
                                 <div key={index} className="relative w-16 h-16 flex-shrink-0 border rounded bg-zinc-700 p-1">
                                     {file.type.startsWith("image/") ? (

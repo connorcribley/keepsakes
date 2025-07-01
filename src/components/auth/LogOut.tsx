@@ -1,14 +1,13 @@
-"use server";
-
 import { logout } from "@/app/actions/auth";
 
 const LogOut = () => {
     return (
         <form
             action={logout}
+            className="w-full"
         >
             <button
-                className="hover:text-orange-400 transition cursor-pointer"
+                className="cursor-pointer w-full text-left px-4 py-2 hover:bg-orange-500"
             >
                 Logout
             </button>

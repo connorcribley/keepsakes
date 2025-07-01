@@ -47,37 +47,13 @@ const Navbar = async () => {
           </Link>
         </div>
 
-
-        {/* Desktop Auth Links */}
-        {session && session.user && user?.slug ? (
-          <div className="flex space-x-3 font-medium items-center">  {/* Delete this later */}
-            <LogOut />
-            <Link href={`/user/${user.slug}`} className="hover:text-orange-400 transition">
-              {user?.image || session.user.image ? (
-                <img
-                  src={user.image ?? session.user.image ?? undefined}
-                  alt="Logo"
-                  width={40}
-                  height={40}
-                  className="cursor-pointer rounded-full border-2 border-gray-200 hover:border-orange-400 transition"
-                />) : (
-                <UserCircle2 size={40} />
-              )}
-            </Link>
-          </div>
-        ) : (
-          <div className="hidden md:flex space-x-6 font-medium">
-            <Link href="/login" className="hover:text-orange-400 transition">
-              Login
-            </Link>
-            <Link href="/signup" className="hover:text-orange-400 transition">
-              Signup
-            </Link>
-          </div>
-        )}
-
         {/* Mobile Floating Menu */}
-        <FloatingNavMenu isLoggedIn={!!session} />
+        <FloatingNavMenu
+          isLoggedIn={!!session}
+          userSlug={user?.slug}
+          userImage={user?.image ?? session?.user?.image ?? null}
+          logoutButton={<LogOut />}
+        />
       </div>
     </nav>
   );

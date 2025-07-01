@@ -2,12 +2,31 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import cloudinary from "@/lib/cloudinary";
 
 interface SendMessageProps {
     content: string;
     recipientId: string;
     conversationId: string | null;
     attachmentUrls?: string[];
+}
+
+const allowedExtensions = ["jpg", "jpeg", "png", "webp", "gif", "pdf"];
+
+function isValidAttachmentUrl(url: string): boolean {
+    try {
+        const parsed = new URL(url);
+        const pathname = parsed.pathname;
+        const ext = pathname.split(".").pop()?.toLowerCase();
+        return !!ext && allowedExtensions.includes(ext);
+    } catch {
+        return false;
+    }
+}
+
+function getPublicIdFromUrl(url: string): string | null {
+    const match = url.match(/\/upload\/(?:v\d+\/)?([^.\s]+)\.[a-z]+$/i);
+    return match ? match[1] : null;
 }
 
 export async function sendMessage({
@@ -74,12 +93,34 @@ export async function deleteMessage(messageId: string) {
         throw new Error("Forbidden");
     }
 
+    // Step 1: Delete any Cloudinary attachments
+    const attachmentUrls = message.attachmentUrls ?? [];
+
+    await Promise.all(
+        attachmentUrls.map(async (url) => {
+            const publicId = getPublicIdFromUrl(url);
+            if (publicId) {
+                try {
+                    await cloudinary.uploader.destroy(publicId);
+                } catch (err) {
+                    console.error("Error deleting Cloudinary file:", err);
+                }
+            }
+        })
+    );
+
     await prisma.directMessage.delete({
         where: { id: messageId },
     });
 }
 
-export async function updateMessage(messageId: string, messageContent: string) {
+
+
+export async function updateMessage(
+    messageId: string,
+    messageContent: string,
+    attachmentUrls: string[] = []
+) {
     const session = await auth();
     if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -91,8 +132,30 @@ export async function updateMessage(messageId: string, messageContent: string) {
         throw new Error("Forbidden");
     }
 
+    const validAttachmentUrls = attachmentUrls.filter(isValidAttachmentUrl)
+
+    const removedUrls = message.attachmentUrls.filter(
+        (oldUrl) => !validAttachmentUrls.includes(oldUrl)
+    );
+
+    await Promise.all(
+        removedUrls.map(async (url) => {
+            const publicId = getPublicIdFromUrl(url);
+            if (publicId) {
+                try {
+                    await cloudinary.uploader.destroy(publicId);
+                } catch (err) {
+                    console.error("Error deleting from Cloudinary:", err);
+                }
+            }
+        })
+    );
+
     return await prisma.directMessage.update({
         where: { id: messageId },
-        data: { content: messageContent },
+        data: {
+            content: messageContent,
+            attachmentUrls: validAttachmentUrls,
+        },
     });
 }

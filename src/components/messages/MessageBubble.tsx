@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { MoreHorizontal } from "lucide-react";
 import WarningModal from "../floating/WarningModal";
 import { FileText } from "lucide-react";
+import Image from "../Image"
 
 
 interface MessageBubbleProps {
@@ -57,6 +58,39 @@ const MessageBubble = ({
 
     return (
         <>
+            {attachmentUrls && attachmentUrls.length > 0 && attachmentUrls.map((url, index) => {
+                const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
+                const isPDF = url.endsWith(".pdf");
+                const fileName = decodeURIComponent(url.split("/").pop() || "file");
+
+                return (
+                    <div
+                        key={`${id}-attachment-${index}`}
+                        className={clsx("flex mb-1", isSender ? "justify-end" : "justify-start")}
+                    >
+                        {isImage && (
+                            <img
+                                src={url}
+                                alt={`attachment-${index}`}
+                                className="max-w-xs rounded-lg shadow"
+                            />
+                        )}
+
+                        {isPDF && (
+                            <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow bg-zinc-700 text-white max-w-[75%] hover:bg-zinc-600"
+                            >
+                                <FileText size={20} />
+                                <span className="truncate">{fileName}</span>
+                            </a>
+                        )}
+                    </div>
+                );
+            })}
+
             {content && content !== "[Attachment]" && (
                 <div
                     ref={containerRef}
@@ -134,38 +168,7 @@ const MessageBubble = ({
                 </div>
             )}
 
-            {attachmentUrls && attachmentUrls.length > 0 && attachmentUrls.map((url, index) => {
-                const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
-                const isPDF = url.endsWith(".pdf");
-                const fileName = decodeURIComponent(url.split("/").pop() || "file");
-                
-                return (
-                    <div
-                        key={`${id}-attachment-${index}`}
-                        className={clsx("flex mb-1", isSender ? "justify-end" : "justify-start")}
-                    >
-                        {isImage && (
-                            <img
-                                src={url}
-                                alt={`attachment-${index}`}
-                                className="max-w-xs rounded-lg shadow"
-                            />
-                        )}
 
-                        {isPDF && (
-                            <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow bg-zinc-700 text-white max-w-[75%] hover:bg-zinc-600"
-                            >
-                                <FileText size={20} />
-                                <span className="truncate">{fileName}</span>
-                            </a>
-                        )}
-                    </div>
-                );
-            })}
         </>
     )
 };

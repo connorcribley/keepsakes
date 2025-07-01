@@ -1,5 +1,3 @@
-// File: @/app/messages/[slug]/page.tsx
-
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";

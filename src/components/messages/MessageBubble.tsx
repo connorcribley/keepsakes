@@ -91,84 +91,88 @@ const MessageBubble = ({
                 );
             })}
 
-            {content && content !== "[Attachment]" && (
+            <div
+                ref={containerRef}
+                className={clsx("relative flex", isSender ? "justify-end" : "justify-start")}
+            >
                 <div
-                    ref={containerRef}
-                    className={clsx("relative flex", isSender ? "justify-end" : "justify-start")}
+                    className={clsx(
+                        "flex flex-col rounded-xl px-4 py-2 max-w-[75%] text-sm shadow break-words whitespace-pre-wrap overflow-x-hidden",
+                        isSender ? "bg-orange-500 text-white" : "bg-zinc-800 text-gray-200"
+                    )}
                 >
-
-                    <div
-                        className={clsx(
-                            "flex flex-col rounded-xl px-4 py-2 max-w-[75%] text-sm shadow break-words whitespace-pre-wrap overflow-x-hidden",
-                            isSender ? "bg-orange-500 text-white" : "bg-zinc-800 text-gray-200"
-                        )}
-                    >
-                        {/* Ellipses */}
-                        {isSender && (
-                            <div className="flex justify-between space-x-2 my-1 mr-1">
-                                <span className="text-[13px] block text-right opacity-60">
-                                    {new Date(createdAt).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    })}
-                                </span>
-                                <button
-                                    aria-label="More options"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setActiveId(isActive ? null : id);
-                                    }}
-                                    className="text-white hover:text-gray-300 focus:outline-none cursor-pointer"
-                                >
-                                    <MoreHorizontal size={20} />
-                                </button>
-                            </div>
-                        )}
-                        {/* Floating menu */}
-                        {isSender && isActive && (
-                            <div
-                                ref={menuRef}
-                                className="absolute top-8 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
+                    {/* Timestamp and Ellipses */}
+                    {isSender && (
+                        <div className="flex justify-between space-x-2 my-1 mr-1">
+                            <span className="text-[13px] block text-right opacity-60">
+                                {new Date(createdAt).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}
+                            </span>
+                            <button
+                                aria-label="More options"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveId(isActive ? null : id);
+                                }}
+                                className="text-white hover:text-gray-300 focus:outline-none cursor-pointer"
                             >
-                                <button
-                                    onClick={() => onEdit(id)}
-                                    className="hover:text-orange-400 text-left cursor-pointer"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setShowDeleteModal(true)
-                                    }}
-                                    className="hover:text-red-500 text-left cursor-pointer"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        )}
+                                <MoreHorizontal size={20} />
+                            </button>
+                        </div>
+                    )}
+                    {/* Floating menu */}
+                    {isSender && isActive && (
+                        <div
+                            ref={menuRef}
+                            className="absolute top-8 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
+                        >
+                            <button
+                                onClick={() => onEdit(id)}
+                                className="hover:text-orange-400 text-left cursor-pointer"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowDeleteModal(true)
+                                }}
+                                className="hover:text-red-500 text-left cursor-pointer"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    )}
 
-                        {/* Content and Date */}
+                    {/* Attachment Count Label */}
+                    {attachmentUrls.length > 0 && (
+                        <span className="text-xs font-semibold text-gray-300 mb-1">
+                            [{attachmentUrls.length} Attachment{attachmentUrls.length > 1 ? "s" : ""}]
+                        </span>
+                    )}
+
+                    {/* Message Content */}
+                    {content && content !== "[Attachment]" && (
                         <p className="my-1">{content}</p>
+                    )}
 
 
-                        <WarningModal
-                            isOpen={showDeleteModal}
-                            onClose={() => setShowDeleteModal(false)}
-                            onConfirm={async () => {
-                                await onDelete(id);          // ← Call parent delete handler
-                                setShowDeleteModal(false); // Close modal
-                                setActiveId(null);         // Close menu
-                            }}
-                            title="Delete Message"
-                            content="Do you really want to delete this message?"
-                            closeText="Cancel"
-                            confirmText="Delete"
-                        />
-                    </div>
+                    <WarningModal
+                        isOpen={showDeleteModal}
+                        onClose={() => setShowDeleteModal(false)}
+                        onConfirm={async () => {
+                            await onDelete(id);          // ← Call parent delete handler
+                            setShowDeleteModal(false); // Close modal
+                            setActiveId(null);         // Close menu
+                        }}
+                        title="Delete Message"
+                        content="Do you really want to delete this message?"
+                        closeText="Cancel"
+                        confirmText="Delete"
+                    />
                 </div>
-            )}
-
-
+            </div>
         </>
     )
 };

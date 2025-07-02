@@ -12,6 +12,7 @@ interface SendMessageProps {
 }
 
 const allowedExtensions = ["jpg", "jpeg", "png", "webp", "gif", "pdf"];
+const MAX_MESSAGE_LENGTH = 1000;
 
 function isValidAttachmentUrl(url: string): boolean {
     try {
@@ -40,6 +41,10 @@ export async function sendMessage({
     if (!session?.user?.id) return null;
     const senderId = session.user.id;
 
+    if (content.length > MAX_MESSAGE_LENGTH) {
+        throw new Error("Message too long");
+    }
+
     let convoId = conversationId;
 
     if (!convoId) {
@@ -62,10 +67,12 @@ export async function sendMessage({
         ).id;
     }
 
+    const validAttachmentUrls = attachmentUrls.filter(isValidAttachmentUrl)
+
     const message = await prisma.directMessage.create({
         data: {
             content,
-            attachmentUrls,
+            attachmentUrls: validAttachmentUrls,
             senderId,
             recipientId,
             conversationId: convoId,
@@ -123,6 +130,10 @@ export async function updateMessage(
 ) {
     const session = await auth();
     if (!session?.user?.id) throw new Error("Unauthorized");
+    
+    if (messageContent.length > MAX_MESSAGE_LENGTH) {
+        throw new Error("Message too long");
+    }
 
     const message = await prisma.directMessage.findUnique({
         where: { id: messageId },

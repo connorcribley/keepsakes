@@ -6,6 +6,7 @@ import { sendMessage, deleteMessage, updateMessage } from "@/app/actions/message
 import { Send, Trash2, Paperclip, X, FileText } from "lucide-react";
 import WarningModal from "../floating/WarningModal";
 import MessageBubble from "./MessageBubble";
+import clsx from "clsx";
 
 interface MessageThreadProps {
     messages: DirectMessage[];
@@ -13,6 +14,10 @@ interface MessageThreadProps {
     recipientId: string;
     conversationId: string | null;
 }
+
+const MAX_MESSAGE_LENGTH = 1000;
+const MAX_ATTACHMENTS = 5;
+const MAX_FILE_SIZE_MB = 5;
 
 const MessageThread = ({ messages, userId, recipientId, conversationId }: MessageThreadProps) => {
     const [newMessage, setNewMessage] = useState("");
@@ -139,6 +144,13 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
         }
     };
 
+    const messageTooLong = newMessage.length > MAX_MESSAGE_LENGTH;
+    const totalAttachments = existingAttachments.length + attachments.length;
+    const tooManyAttachments = totalAttachments > MAX_ATTACHMENTS;
+    const oversizedFiles = attachments.filter(file => file.size > MAX_FILE_SIZE_MB * 1024 * 1024);
+    const hasOversized = oversizedFiles.length > 0;
+    const disableSend = messageTooLong || tooManyAttachments || hasOversized;
+
     return (
         <div className="flex flex-col h-full">
             {/* Scrollable Messages */}
@@ -187,7 +199,14 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
                 {(existingAttachments.length > 0 || attachments.length > 0) && (
                     <div className="flex flex-col">
                         <h2 className="text-sm font-semibold text-gray-300 mb-1">
-                            Attachments ({existingAttachments.length + attachments.length}):
+                            Attachments (<span className={tooManyAttachments ? "text-red-500" : ""}>
+                                {totalAttachments}
+                            </span> of {MAX_ATTACHMENTS}):
+                            {hasOversized && (
+                                <span className="ml-2 text-red-500 font-semibold">
+                                    [One or more attachments exceeds 5MB]
+                                </span>
+                            )}
                         </h2>
                         <div className="flex overflow-x-auto gap-2 mb-2 px-1">
                             {/* Existing attachments (Edit)*/}
@@ -213,8 +232,17 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
                                 </div>
                             ))}
                             {/* Added attachments (Send or Edit) */}
-                            {attachments.map((file, index) => (
-                                <div key={index} className="relative w-16 h-16 flex-shrink-0 border rounded bg-zinc-700 p-1">
+                            {attachments.map((file, index) => {
+                                const isOversized = file.size > MAX_FILE_SIZE_MB * 1024 * 1024;
+                                const isOverflow = totalAttachments > MAX_ATTACHMENTS && index + existingAttachments.length >= MAX_ATTACHMENTS;
+
+                                return (<div
+                                    key={index}
+                                    className={clsx(
+                                        "relative w-16 h-16 flex-shrink-0 border rounded bg-zinc-700 p-1",
+                                        (isOversized || isOverflow) ? "border-red-500" : "border-white"
+                                    )}
+                                >
                                     {file.type.startsWith("image/") ? (
                                         <img
                                             src={URL.createObjectURL(file)}
@@ -236,8 +264,8 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
                                     >
                                         <X size={18} />
                                     </button>
-                                </div>
-                            ))}
+                                </div>)
+                            })}
                         </div>
                     </div>
 
@@ -260,61 +288,77 @@ const MessageThread = ({ messages, userId, recipientId, conversationId }: Messag
                             <Trash2 size={30} />
                         </button>
                     )}
-                    <textarea
-                        value={newMessage}
-                        onChange={(e) => {
-                            setNewMessage(e.target.value)
+                    <div className="flex flex-col w-full bg-zinc-800 rounded max-h-30">
+                        <textarea
+                            value={newMessage}
+                            onChange={(e) => {
+                                setNewMessage(e.target.value)
+                                const textarea = e.target;
+                                textarea.style.height = "auto"; // Reset height
+                                textarea.style.height = `${textarea.scrollHeight}px`; // Set new height
+                            }}
+                            placeholder={editId ? "Edit your message..." : "Type your message..."}
+                            // rows={1}
+                            className="w-full h-full resize-none bg-transparent border-none text-white outline-none px-2 pt-2"
+                        />
+                        <div className="flex justify-end gap-2 items-center px-2 py-1">
+                            <div>
+                                <span className={messageTooLong ? "text-red-500 font-semibold" : "text-gray-400"}>
+                                    {newMessage.length}
+                                </span>
+                                <span className="text-gray-400">
+                                    /{MAX_MESSAGE_LENGTH}
+                                </span>
+                            </div>
+                            <div >
+                                <input
+                                    type="file"
+                                    accept="image/*,.pdf"
+                                    capture="environment"
+                                    multiple
+                                    onChange={(e) => {
+                                        if (e.target.files) {
+                                            const newFiles = Array.from(e.target.files);
 
-                            const textarea = e.target;
-                            textarea.style.height = "auto"; // Reset height
-                            textarea.style.height = `${textarea.scrollHeight}px`; // Set new height
-                        }}
-                        placeholder={editId ? "Edit your message..." : "Type your message..."}
-                        rows={1}
-                        className="flex-1 resize-none bg-zinc-800 text-white rounded px-3 py-2 outline-none max-h-35"
-                    />
-                    <div className="flex flex-col gap-2 items-center justify-between min-h-[80px] py-1">
-                        <div >
-                            <input
-                                type="file"
-                                accept="image/*,.pdf"
-                                capture="environment"
-                                multiple
-                                onChange={(e) => {
-                                    if (e.target.files) {
-                                        const newFiles = Array.from(e.target.files);
+                                            setAttachments((prev) => {
+                                                const existingFileNames = new Set(prev.map((file) => file.name + file.lastModified));
+                                                const uniqueNewFiles = newFiles.filter(
+                                                    (file) => !existingFileNames.has(file.name + file.lastModified)
+                                                );
 
-                                        setAttachments((prev) => {
-                                            const existingFileNames = new Set(prev.map((file) => file.name + file.lastModified));
-                                            const uniqueNewFiles = newFiles.filter(
-                                                (file) => !existingFileNames.has(file.name + file.lastModified)
-                                            );
+                                                return [...prev, ...uniqueNewFiles];
+                                            });
 
-                                            return [...prev, ...uniqueNewFiles];
-                                        });
+                                            e.target.value = '';
+                                        }
+                                    }}
+                                    className="hidden"
+                                    ref={fileInputRef}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="cursor-pointer text-blue-500 hover:text-blue-600"
+                                >
+                                    <Paperclip size={30} />
+                                </button>
+                            </div>
 
-                                        e.target.value = '';
-                                    }
-                                }}
-                                className="hidden"
-                                ref={fileInputRef}
-                            />
                             <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="cursor-pointer bg-blue-400 hover:bg-blue-500 text-white rounded-full w-12 h-12 md:w-15 md:h-15 flex justify-center items-center"
+                                type="submit"
+                                disabled={disableSend}
+                                className={clsx(
+                                    disableSend
+                                        ? "text-gray-600 cursor-not-allowed"
+                                        : "text-orange-500 hover:text-orange-600 cursor-pointer "
+                                )}
                             >
-                                <Paperclip size={30} />
+                                <Send size={30} />
                             </button>
                         </div>
-
-                        <button
-                            type="submit"
-                            className="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white w-12 h-12 md:w-15 md:h-15 pr-1 pt-1 flex justify-center items-center rounded-full"
-                        >
-                            <Send size={30} />
-                        </button>
                     </div>
+
+
                 </form>
             </div>
             <WarningModal

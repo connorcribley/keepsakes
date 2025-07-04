@@ -148,7 +148,7 @@ model Review {
 
 model DirectMessage {
   id            String    @id @default(cuid())
-  content       String
+  content       String?
   readAt        DateTime?
   attachmentUrls String[]
 

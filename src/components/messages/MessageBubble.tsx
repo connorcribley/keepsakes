@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { MoreHorizontal } from "lucide-react";
 import WarningModal from "../floating/WarningModal";
 import { FileText } from "lucide-react";
-import Image from "../Image"
+import ClickableImage from "../ClickableImage";
 
 
 interface MessageBubbleProps {
@@ -71,7 +71,7 @@ const MessageBubble = ({
                         className={clsx("flex mb-1", isSender ? "justify-end" : "justify-start")}
                     >
                         {isImage && (
-                            <img
+                            <ClickableImage
                                 src={url}
                                 alt={`attachment-${index}`}
                                 className="max-w-xs rounded-lg shadow"
@@ -99,7 +99,7 @@ const MessageBubble = ({
             >
                 <div
                     className={clsx(
-                        "flex flex-col rounded-xl px-4 py-2 max-w-[75%] text-sm shadow break-words whitespace-pre-wrap overflow-x-hidden",
+                        "flex flex-col rounded-xl px-4 py-2 max-w-[75%] md:max-w-[50%] xl:max-w-[35%] text-sm shadow break-words whitespace-pre-wrap overflow-x-hidden",
                         isSender ? "bg-orange-500 text-white" : "bg-zinc-800 text-gray-200"
                     )}
                 >

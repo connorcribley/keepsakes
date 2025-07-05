@@ -26,8 +26,23 @@ function isValidAttachmentUrl(url: string): boolean {
 }
 
 function getPublicIdFromUrl(url: string): string | null {
-    const match = url.match(/\/upload\/(?:v\d+\/)?([^.\s]+)\.[a-z]+$/i);
-    return match ? match[1] : null;
+    try {
+        const parsed = new URL(url);
+        const path = parsed.pathname;
+
+        // Strip version prefix (e.g., /v1751739552/)
+        const versionRegex = /\/v\d+\//;
+        const versionSplit = path.split(versionRegex);
+
+        if (versionSplit.length < 2) return null;
+
+        // Remove extension (.jpg, .pdf, etc.)
+        const withFolders = versionSplit[1].replace(/\.[^.]+$/, ""); // removes extension
+
+        return withFolders.startsWith("/") ? withFolders.slice(1) : withFolders;
+    } catch {
+        return null;
+    }
 }
 
 export async function sendMessage({
@@ -106,9 +121,15 @@ export async function deleteMessage(messageId: string) {
     await Promise.all(
         attachmentUrls.map(async (url) => {
             const publicId = getPublicIdFromUrl(url);
+            const ext = url.split(".").pop()?.toLowerCase();
+            const resourceType = ext === "pdf" ? "raw" : "image";
+
             if (publicId) {
                 try {
-                    await cloudinary.uploader.destroy(publicId);
+                    await cloudinary.uploader.destroy(publicId, {
+                        resource_type: resourceType,
+                        type: "authenticated",
+                    });
                 } catch (err) {
                     console.error("Error deleting Cloudinary file:", err);
                 }
@@ -130,7 +151,7 @@ export async function updateMessage(
 ) {
     const session = await auth();
     if (!session?.user?.id) throw new Error("Unauthorized");
-    
+
     if (messageContent.length > MAX_MESSAGE_LENGTH) {
         throw new Error("Message too long");
     }
@@ -149,14 +170,21 @@ export async function updateMessage(
         (oldUrl) => !validAttachmentUrls.includes(oldUrl)
     );
 
+
     await Promise.all(
         removedUrls.map(async (url) => {
             const publicId = getPublicIdFromUrl(url);
+            const ext = url.split(".").pop()?.toLowerCase();
+            const resourceType = ext === "pdf" ? "raw" : "image";
+
             if (publicId) {
                 try {
-                    await cloudinary.uploader.destroy(publicId);
+                    await cloudinary.uploader.destroy(publicId, {
+                        resource_type: resourceType,
+                        type: "authenticated",
+                    });
                 } catch (err) {
-                    console.error("Error deleting from Cloudinary:", err);
+                    console.error("Error deleting Cloudinary file:", err);
                 }
             }
         })
@@ -168,5 +196,52 @@ export async function updateMessage(
             content: messageContent,
             attachmentUrls: validAttachmentUrls,
         },
+    });
+}
+
+export async function deleteConversation(conversationId: string) {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
+
+    // Get the conversation and check if user is a participant
+    const conversation = await prisma.conversation.findUnique({
+        where: { id: conversationId },
+        include: { messages: true },
+    });
+
+    if (!conversation) throw new Error("Conversation not found");
+
+    const { participant1Id, participant2Id, messages } = conversation;
+
+    const isParticipant =
+        session.user.id === participant1Id || session.user.id === participant2Id;
+
+    if (!isParticipant) throw new Error("Forbidden");
+
+    // Collect all attachment URLs to delete from Cloudinary
+    const allUrls = messages.flatMap((msg) => msg.attachmentUrls ?? []);
+
+    await Promise.all(
+        allUrls.map(async (url) => {
+            const publicId = getPublicIdFromUrl(url);
+            const ext = url.split(".").pop()?.toLowerCase();
+            const resourceType = ext === "pdf" ? "raw" : "image";
+
+            if (publicId) {
+                try {
+                    await cloudinary.uploader.destroy(publicId, {
+                        resource_type: resourceType,
+                        type: "authenticated",
+                    });
+                } catch (err) {
+                    console.error("Error deleting Cloudinary file:", err);
+                }
+            }
+        })
+    );
+
+    // Delete the conversation (cascades to messages via Prisma schema)
+    await prisma.conversation.delete({
+        where: { id: conversationId },
     });
 }

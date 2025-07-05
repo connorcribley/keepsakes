@@ -21,29 +21,23 @@ type ConversationProps = {
     },
 };
 
-const Conversation = ({ conversation,}: ConversationProps) => {
+const Conversation = ({ conversation, }: ConversationProps) => {
     const { otherUser, lastMessage } = conversation;
 
     return (
         <Link
             href={`/messages/${otherUser.slug}`}
-            className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 transition"
+            className="flex flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-zinc-700 hover:bg-zinc-600 transition shadow-xl hover:shadow-x2l"
         >
             {/* Avatar */}
             <div className="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border border-gray-500">
-                {otherUser.image ? (
-                    <Image
-                        src={otherUser.image}
-                        alt={otherUser.name}
-                        width={48}
-                        height={48}
-                        className="object-cover w-full h-full"
-                    />
-                ) : (
-                    <div className="bg-gray-700 w-full h-full flex items-center justify-center text-white font-bold text-xl">
-                        {otherUser.name.charAt(0).toUpperCase()}
-                    </div>
-                )}
+                <Image
+                    src={otherUser.image || "/default-avatar.png"}
+                    alt={otherUser.name}
+                    width={48}
+                    height={48}
+                    className="object-cover w-full h-full"
+                />
             </div>
 
             {/* Content */}
@@ -67,9 +61,6 @@ const Conversation = ({ conversation,}: ConversationProps) => {
                             <span className="italic text-gray-500">No messages yet</span>
                         )}
                     </p>
-                    {!lastMessage?.readAt && lastMessage?.content && (
-                        <span className="w-2 h-2 rounded-full bg-orange-400 ml-2 shrink-0" />
-                    )}
                 </div>
             </div>
         </Link>

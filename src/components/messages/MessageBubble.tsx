@@ -67,8 +67,8 @@ const MessageBubble = ({
         <>
             {attachmentUrls && attachmentUrls.length > 0 && attachmentUrls.map((url, index) => {
                 const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)$/i);
-                const isPDF = url.endsWith(".pdf");
-                const fileName = decodeURIComponent(url.split("/").pop() || "file");
+                // const isPDF = url.endsWith(".pdf");
+                // const fileName = decodeURIComponent(url.split("/").pop() || "file");
 
                 return (
                     <div
@@ -81,18 +81,6 @@ const MessageBubble = ({
                                 alt={`attachment-${index}`}
                                 className="max-w-xs rounded-lg shadow"
                             />
-                        )}
-
-                        {isPDF && (
-                            <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow bg-zinc-700 text-white max-w-[75%] hover:bg-zinc-600"
-                            >
-                                <FileText size={20} />
-                                <span className="truncate">{fileName}</span>
-                            </a>
                         )}
                     </div>
                 );
@@ -133,7 +121,7 @@ const MessageBubble = ({
                     {isSender && isActive && (
                         <div
                             ref={menuRef}
-                            className="absolute top-8 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
+                            className="absolute bottom-8 right-11 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
                         >
                             <button
                                 onClick={() => isBlocked ? setShowBlockedEditModal(true) : onEdit(id)}

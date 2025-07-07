@@ -11,7 +11,7 @@ interface SendMessageProps {
     attachmentUrls?: string[];
 }
 
-const allowedExtensions = ["jpg", "jpeg", "png", "webp", "gif", "pdf"];
+const allowedExtensions = ["jpg", "jpeg", "png", "webp", "gif"];
 const MAX_MESSAGE_LENGTH = 1000;
 
 function isValidAttachmentUrl(url: string): boolean {
@@ -135,13 +135,13 @@ export async function deleteMessage(messageId: string) {
         attachmentUrls.map(async (url) => {
             const publicId = getPublicIdFromUrl(url);
             const ext = url.split(".").pop()?.toLowerCase();
-            const resourceType = ext === "pdf" ? "raw" : "image";
+            const resourceType = "image";
 
             if (publicId) {
                 try {
                     await cloudinary.uploader.destroy(publicId, {
                         resource_type: resourceType,
-                        type: "authenticated",
+                        type: "upload",
                     });
                 } catch (err) {
                     console.error("Error deleting Cloudinary file:", err);
@@ -201,13 +201,13 @@ export async function updateMessage(
         removedUrls.map(async (url) => {
             const publicId = getPublicIdFromUrl(url);
             const ext = url.split(".").pop()?.toLowerCase();
-            const resourceType = ext === "pdf" ? "raw" : "image";
+            const resourceType = "image";
 
             if (publicId) {
                 try {
                     await cloudinary.uploader.destroy(publicId, {
                         resource_type: resourceType,
-                        type: "authenticated",
+                        type: "upload",
                     });
                 } catch (err) {
                     console.error("Error deleting Cloudinary file:", err);
@@ -251,13 +251,13 @@ export async function deleteConversation(conversationId: string) {
         allUrls.map(async (url) => {
             const publicId = getPublicIdFromUrl(url);
             const ext = url.split(".").pop()?.toLowerCase();
-            const resourceType = ext === "pdf" ? "raw" : "image";
+            const resourceType = "image";
 
             if (publicId) {
                 try {
                     await cloudinary.uploader.destroy(publicId, {
                         resource_type: resourceType,
-                        type: "authenticated",
+                        type: "upload",
                     });
                 } catch (err) {
                     console.error("Error deleting Cloudinary file:", err);

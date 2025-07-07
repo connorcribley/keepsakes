@@ -7,14 +7,21 @@ import { useRouter } from "next/navigation";
 import WarningModal from "../floating/WarningModal";
 import { blockUser, unblockUser } from "@/app/actions/block";
 
-interface Props {
+interface MessageMenuButtonProps {
     conversationId: string | null;
     recipientId: string;
     recipientName: string | null;
     isBlocked: boolean;
+    onBlockChange: (blocked: boolean) => void;
 }
 
-const MessageMenuButton = ({ conversationId, recipientId, recipientName, isBlocked }: Props) => {
+const MessageMenuButton = ({ 
+    conversationId, 
+    recipientId, 
+    recipientName, 
+    isBlocked,
+    onBlockChange 
+}: MessageMenuButtonProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
@@ -23,6 +30,33 @@ const MessageMenuButton = ({ conversationId, recipientId, recipientName, isBlock
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const router = useRouter();
 
+    const handleBlock = async () => {
+        if (!recipientId) return alert("Could not find user");
+
+        try {
+            await blockUser(recipientId);
+            onBlockChange(true);
+            setShowBlockModal(false)
+        } catch (err) {
+            console.error("Block failed:", err);
+            alert("Failed to block user.");
+        }
+        setIsOpen(false);
+    }
+
+    const handleUnblock = async () => {
+        if (!recipientId) return alert("Could not find user");
+
+        try {
+            await unblockUser(recipientId);
+            onBlockChange(false);
+            setShowUnblockModal(false)
+        } catch (err) {
+            console.error("Unblock failed:", err);
+            alert("Failed to unblock user.");
+        }
+        setIsOpen(false);
+    }
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -85,49 +119,20 @@ const MessageMenuButton = ({ conversationId, recipientId, recipientName, isBlock
                 </div>
             )}
 
-            {/* Block User */}
+            
+            {/* Block/Unblock User */}
             <WarningModal
-                isOpen={showBlockModal}
-                onClose={() => setShowBlockModal(false)}
-                onConfirm={async () => {
-                    if (!recipientId) return alert("Could not find user");
-
-                    try {
-                        await blockUser(recipientId);
-                        alert("User has been blocked.");
-                        setShowBlockModal(false)
-                    } catch (err) {
-                        console.error("Block failed:", err);
-                        alert("Failed to block user.");
-                    }
-                    setIsOpen(false);
-                }}
-                title="Block User"
-                content={`Do you really want to block ${recipientName ?? "this user"}?`}
+                isOpen={isBlocked ? showUnblockModal : showBlockModal}
+                onClose={() => { isBlocked ? setShowUnblockModal(false) : setShowBlockModal(false) }}
+                onConfirm={async () => { isBlocked ? handleUnblock() : handleBlock() }}
+                title={isBlocked ? "Unblock User" : "Block User"}
+                content={
+                    isBlocked ?
+                        `Do you really want to unblock ${recipientName ?? "this user"}?`
+                        : `Do you really want to block ${recipientName ?? "this user"}?`
+                }
                 closeText="Cancel"
-                confirmText="Block"
-            />
-            {/* Unblock User */}
-            <WarningModal
-                isOpen={showUnblockModal}
-                onClose={() => setShowUnblockModal(false)}
-                onConfirm={async () => {
-                    if (!recipientId) return alert("Could not find user");
-
-                    try {
-                        await unblockUser(recipientId);
-                        alert("User has been unblocked.");
-                        setShowBlockModal(false)
-                    } catch (err) {
-                        console.error("Unblock failed:", err);
-                        alert("Failed to unblock user.");
-                    }
-                    setIsOpen(false);
-                }}
-                title="Unblock User"
-                content={`Do you really want to unblock ${recipientName ?? "this user"}?`}
-                closeText="Cancel"
-                confirmText="Unblock"
+                confirmText={isBlocked ? "Unblock" : "Block"}
             />
             {/* Delete Conversation */}
             <WarningModal

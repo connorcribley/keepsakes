@@ -47,7 +47,7 @@ const ConversationsPage = async () => {
             },
             lastMessage: lastMessage
                 ? {
-                    content: lastMessage.content ?? "[Attachments]",
+                    content: lastMessage.content || "[Attachments]",
                     createdAt: lastMessage.createdAt,
                     readAt: lastMessage.readAt,
                 }

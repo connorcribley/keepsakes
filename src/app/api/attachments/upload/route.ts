@@ -11,8 +11,7 @@ const allowedMimeTypes = [
     "image/jpeg",
     "image/png",
     "image/webp",
-    "image/gif",
-    "application/pdf"
+    "image/gif"
 ];
 
 const MAX_FILES = 5;
@@ -65,7 +64,7 @@ export async function POST(req: NextRequest) {
                 {
                     folder: "private_dm_attachments",
                     resource_type: "auto",
-                    type: "authenticated", // disables public access
+                    type: "upload",
                 },
                 (err, result) => {
                     if (err || !result) return reject(err);

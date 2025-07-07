@@ -56,6 +56,19 @@ export async function sendMessage({
     if (!session?.user?.id) return null;
     const senderId = session.user.id;
 
+    const block = await prisma.userBlock.findFirst({
+        where: {
+            OR: [
+                { blockerId: senderId, blockedId: recipientId },
+                { blockerId: recipientId, blockedId: senderId },
+            ],
+        },
+    });
+
+    if (block) {
+        throw new Error("You cannot send messages to a user you have blocked or who has blocked you.");
+    }
+
     if (content.length > MAX_MESSAGE_LENGTH) {
         throw new Error("Message too long");
     }
@@ -162,6 +175,19 @@ export async function updateMessage(
 
     if (!message || message.senderId !== session.user.id) {
         throw new Error("Forbidden");
+    }
+
+    const block = await prisma.userBlock.findFirst({
+        where: {
+            OR: [
+                { blockerId: session.user.id, blockedId: message.recipientId },
+                { blockerId: message.recipientId, blockedId: session.user.id },
+            ],
+        },
+    });
+
+    if (block) {
+        throw new Error("You cannot update messages sent to a user you have blocked or who has blocked you.");
     }
 
     const validAttachmentUrls = attachmentUrls.filter(isValidAttachmentUrl)

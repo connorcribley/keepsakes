@@ -28,6 +28,15 @@ const MessagePage = async ({ params }: Props) => {
     });
     if (!recipient || recipient.id === sender.id) notFound();
 
+    const isBlocked = await prisma.userBlock.findFirst({
+        where: {
+            OR: [
+                { blockerId: sender.id, blockedId: recipient.id },
+                { blockerId: recipient.id, blockedId: sender.id },
+            ],
+        },
+    });
+
     const conversation = await prisma.conversation.findFirst({
         where: {
             OR: [
@@ -70,7 +79,12 @@ const MessagePage = async ({ params }: Props) => {
                         {recipient.name}
                     </h1>
                 </Link>
-                    <MessageMenuButton conversationId={conversation?.id ?? null} />
+                <MessageMenuButton
+                    conversationId={conversation?.id ?? null}
+                    recipientId={recipient.id}
+                    recipientName={recipient.name}
+                    isBlocked={!!isBlocked}
+                />
             </div>
             <div className="flex-1 overflow-hidden">
                 <MessageThread
@@ -78,6 +92,7 @@ const MessagePage = async ({ params }: Props) => {
                     userId={sender.id}
                     conversationId={conversation?.id ?? null}
                     recipientId={recipient.id}
+                    isBlocked={!!isBlocked}
                 />
             </div>
         </div>

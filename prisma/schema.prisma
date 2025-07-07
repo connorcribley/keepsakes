@@ -42,6 +42,9 @@ model User {
   conversationsAsParticipant1 Conversation[] @relation("Conversation1")
   conversationsAsParticipant2 Conversation[] @relation("Conversation2")
 
+  blocks    UserBlock[] @relation("UserBlocks")
+  blockedBy UserBlock[] @relation("UserBlockedBy")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -147,9 +150,9 @@ model Review {
 }
 
 model DirectMessage {
-  id            String    @id @default(cuid())
-  content       String?
-  readAt        DateTime?
+  id             String    @id @default(cuid())
+  content        String?
+  readAt         DateTime?
   attachmentUrls String[]
 
   createdAt DateTime @default(now())
@@ -165,8 +168,8 @@ model DirectMessage {
 }
 
 model Conversation {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
   updatedAt DateTime?
 
   participant1Id String
@@ -176,4 +179,15 @@ model Conversation {
   participant2 User @relation("Conversation2", fields: [participant2Id], references: [id], onDelete: Cascade)
 
   messages DirectMessage[]
+}
+
+model UserBlock {
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  blocker User @relation("UserBlocks", fields: [blockerId], references: [id])
+  blocked User @relation("UserBlockedBy", fields: [blockedId], references: [id])
+
+  @@id([blockerId, blockedId]) // Composite primary key
 }

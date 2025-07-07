@@ -5,15 +5,21 @@ import { MoreHorizontal } from "lucide-react";
 import { deleteConversation } from "@/app/actions/messages";
 import { useRouter } from "next/navigation";
 import WarningModal from "../floating/WarningModal";
+import { blockUser, unblockUser } from "@/app/actions/block";
 
 interface Props {
     conversationId: string | null;
+    recipientId: string;
+    recipientName: string | null;
+    isBlocked: boolean;
 }
 
-const MessageMenuButton = ({ conversationId }: Props) => {
+const MessageMenuButton = ({ conversationId, recipientId, recipientName, isBlocked }: Props) => {
     const [isOpen, setIsOpen] = useState(false);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const [showBlockModal, setShowBlockModal] = useState(false);
+    const [showUnblockModal, setShowUnblockModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const router = useRouter();
 
@@ -49,16 +55,25 @@ const MessageMenuButton = ({ conversationId }: Props) => {
                     ref={menuRef}
                     className="absolute top-12 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
                 >
-                    <button
-                        onClick={() => {
-                            setIsOpen(false);
-                            alert("Block User clicked");
-                            // TODO: Hook into your actual block logic
-                        }}
-                        className="hover:text-orange-400 text-left cursor-pointer"
-                    >
-                        Block User
-                    </button>
+                    {isBlocked ? (
+                        <button
+                            onClick={() => {
+                                setShowUnblockModal(true)
+                            }}
+                            className="hover:text-orange-400 text-left cursor-pointer"
+                        >
+                            Unblock User
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => {
+                                setShowBlockModal(true)
+                            }}
+                            className="hover:text-orange-400 text-left cursor-pointer"
+                        >
+                            Block User
+                        </button>
+                    )}
                     <button
                         onClick={async () => {
                             setShowDeleteModal(true)
@@ -70,6 +85,51 @@ const MessageMenuButton = ({ conversationId }: Props) => {
                 </div>
             )}
 
+            {/* Block User */}
+            <WarningModal
+                isOpen={showBlockModal}
+                onClose={() => setShowBlockModal(false)}
+                onConfirm={async () => {
+                    if (!recipientId) return alert("Could not find user");
+
+                    try {
+                        await blockUser(recipientId);
+                        alert("User has been blocked.");
+                        setShowBlockModal(false)
+                    } catch (err) {
+                        console.error("Block failed:", err);
+                        alert("Failed to block user.");
+                    }
+                    setIsOpen(false);
+                }}
+                title="Block User"
+                content={`Do you really want to block ${recipientName ?? "this user"}?`}
+                closeText="Cancel"
+                confirmText="Block"
+            />
+            {/* Unblock User */}
+            <WarningModal
+                isOpen={showUnblockModal}
+                onClose={() => setShowUnblockModal(false)}
+                onConfirm={async () => {
+                    if (!recipientId) return alert("Could not find user");
+
+                    try {
+                        await unblockUser(recipientId);
+                        alert("User has been unblocked.");
+                        setShowBlockModal(false)
+                    } catch (err) {
+                        console.error("Unblock failed:", err);
+                        alert("Failed to unblock user.");
+                    }
+                    setIsOpen(false);
+                }}
+                title="Unblock User"
+                content={`Do you really want to unblock ${recipientName ?? "this user"}?`}
+                closeText="Cancel"
+                confirmText="Unblock"
+            />
+            {/* Delete Conversation */}
             <WarningModal
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
@@ -85,10 +145,10 @@ const MessageMenuButton = ({ conversationId }: Props) => {
                     }
                     setIsOpen(false);
                 }}
-                title="Delete Message"
-                content="Do you really want to delete this message?"
+                title="Delete Conversation"
+                content="Do you really want to delete this entire conversation?"
                 closeText="Cancel"
-                confirmText="Delete"
+                confirmText="Delete Conversation"
             />
         </>
     )

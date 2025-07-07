@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { MoreHorizontal } from "lucide-react";
 import WarningModal from "../floating/WarningModal";
+import ErrorModal from "../floating/ErrorModal";
 import { FileText } from "lucide-react";
 import ClickableImage from "../ClickableImage";
 
@@ -12,6 +13,7 @@ interface MessageBubbleProps {
     id: string;
     content: string;
     isSender: boolean;
+    isBlocked: boolean;
     createdAt: Date;
     updatedAt?: Date;
     attachmentUrls?: string[];
@@ -25,6 +27,7 @@ const MessageBubble = ({
     id,
     content,
     isSender,
+    isBlocked,
     createdAt,
     updatedAt,
     attachmentUrls = [],
@@ -37,6 +40,8 @@ const MessageBubble = ({
     const containerRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showBlockedEditModal, setShowBlockedEditModal] = useState(false);
+    
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -131,7 +136,7 @@ const MessageBubble = ({
                             className="absolute top-8 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
                         >
                             <button
-                                onClick={() => onEdit(id)}
+                                onClick={() => isBlocked ? setShowBlockedEditModal(true) : onEdit(id)}
                                 className="hover:text-orange-400 text-left cursor-pointer"
                             >
                                 Edit
@@ -167,6 +172,13 @@ const MessageBubble = ({
                     )}
 
 
+                    <ErrorModal 
+                        isOpen={showBlockedEditModal}
+                        onClose={() => setShowBlockedEditModal(false)}
+                        title="Blocked User"
+                        content="You cannot edit messages in a conversation with a blocked user."
+                        closeText="Close"
+                    />
                     <WarningModal
                         isOpen={showDeleteModal}
                         onClose={() => setShowDeleteModal(false)}

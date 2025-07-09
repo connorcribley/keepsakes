@@ -50,7 +50,7 @@ const Listing = (/* {
   ]
 
   return (
-    <div className="border-2 border-orange-400 rounded-2xl p-4 text-gray-200 shadow-sm mx-auto w-full max-w-6xl m-2">
+    <div className=" p-4 mx-auto w-full max-w-6xl m-2 bg-zinc-900 text-gray-200 shadow border border-gray-700 rounded-xl">
 
       <div className="flex flex-col gap-4">
 

@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { DirectMessage } from "@prisma/client";
 import { sendMessage, deleteMessage, updateMessage } from "@/app/actions/messages";
-import { Send, ImagePlus, X, FileText, SquarePen } from "lucide-react";
-import { ArrowLeft, MoreHorizontal } from "lucide-react";
+import { Send, ImagePlus, X, SquarePen } from "lucide-react";
+import { ArrowLeft,} from "lucide-react";
 import MessageMenuButton from "@/components/messages/MessageMenuButton";
 import WarningModal from "../floating/WarningModal";
 import MessageBubble from "./MessageBubble";
@@ -322,7 +322,7 @@ const MessageClient = ({
                                                 )}
                                                 {hasInvalidType && (
                                                     <span>
-                                                        [Invalid file type]
+                                                        [File must be an image (jpg, png, webp, gif)]
                                                     </span>
                                                 )}
                                             </div>

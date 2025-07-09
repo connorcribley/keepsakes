@@ -36,7 +36,7 @@ const FloatingNavMenu = ({ isLoggedIn, userSlug, userImage, logoutButton }: Prop
                         alt="Profile Picture"
                         width={40}
                         height={40}
-                        className="cursor-pointer rounded-full border-2 border-gray-200 hover:border-orange-400 transition"
+                        className="cursor-pointer rounded-full border-2 border-gray-100 hover:border-orange-400 transition"
                     />
                 ) : (
                     <UserCircle2 size={40} />

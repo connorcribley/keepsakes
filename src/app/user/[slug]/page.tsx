@@ -1,12 +1,13 @@
 
-import Image from "@/components/Image";
+import ClickableImage from "@/components/ClickableImage";
 import StarRating from "@/components/StarRating";
-import { X, UserCircle2, ChevronUp, ChevronDown, MapPin } from "lucide-react";
+import { UserCircle2, ChevronUp, MapPin, MoreHorizontal } from "lucide-react";
 import Listing from "@/components/Listing";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { MessageCircle } from "lucide-react";
+import ProfileMenuButton from "@/components/profile/ProfileMenuButton";
+
 import Link from "next/link";
 
 
@@ -24,9 +25,31 @@ const UserPage = async ({ params }: Props) => {
 
     const user = await prisma.user.findUnique({
         where: { slug },
-    })
+        select: {
+            id: true,
+            name: true,
+            slug: true,
+            image: true,
+            location: true,
+            createdAt: true,
+            bio: true,
+        },
+    });
 
     if (!user) notFound();
+
+    const isOwnProfile = session?.user?.id === user.id;
+
+
+    const isBlocked = isOwnProfile ? null : await prisma.userBlock.findFirst({
+        where: {
+            OR: [
+                { blockerId: session?.user?.id, blockedId: user.id },
+                { blockerId: user.id, blockedId: session?.user?.id },
+            ],
+        },
+    });
+
 
     const dummyComments = [
         {
@@ -52,54 +75,90 @@ const UserPage = async ({ params }: Props) => {
             <div className="flex flex-col lg:flex-row max-w-6xl w-full gap-6">
 
                 <div className="flex-1 min-w-0 flex-col">
-                    <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
 
-                        <div className="my-2 flex flex-col">
-                            <div className="flex items-center gap-4">
-                                <div
-                                    className="w-[100px] h-[100px] rounded-full overflow-hidden cursor-pointer"
-                                >
-                                    {user.image ? (
-                                        <Image
-                                            src={user.image}
-                                            alt="profile picture"
-                                            width={100}
-                                            height={100}
-                                            className="rounded-full w-full h-full object-cover border border-black"
-                                        />
-                                    ) : (
-                                        <UserCircle2
-                                            width={100}
-                                            height={100}
-                                        />
-                                    )}
-                                </div>
-
-                                <div className="flex flex-col">
-                                    <h1 className="text-2xl font-bold">{user.name}</h1>
-                                    <div className="flex items-center">
-                                        <MapPin size={20} className="text-orange-400 mr-2" />
-                                        <p className="text-sm text-orange-400">New York, NY</p>
-                                    </div>
-                                    <p className="text-sm text-gray-400">Joined June 2025</p>
-                                </div>
-
-                                {session?.user?.id && session.user.id !== user.id && (
-                                    <Link
-                                        href={`/messages/${user.slug}`}
-                                        className="ml-2 text-gray-400 hover:text-orange-400 transition"
-                                        title="Send Direct Message"
+                    <div className="bg-zinc-900 text-gray-100 shadow border border-gray-700 rounded-xl my-2">
+                        <div className="m-3 sm:m-5 flex flex-col">
+                            <div className="flex items-start gap-1">
+                                <div className="flex items-center gap-4">
+                                    <div
+                                        className="w-20 h-20 rounded-full overflow-hidden cursor-pointer flex-shrink-0"
                                     >
-                                        <MessageCircle className="w-6 h-6" />
-                                    </Link>
-                                )}
+                                        <ClickableImage
+                                            src={user.image || "/default-pfp.svg"}
+                                            alt="profile picture"
+                                            className="rounded-full w-full h-full object-cover border-2 border-gray-100 hover:border-orange-500"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col space-y-1">
+                                        <h1 className="text-2xl font-bold">{user.name}</h1>
+                                        <div className="hidden sm:flex flex-col space-y-1">
+                                            {user.location ? (
+                                                <div className="flex items-center text-orange-400">
+                                                    <MapPin size={20} className="mr-2" />
+                                                    <p className="text-sm">{user.location}</p>
+                                                </div>
+                                            ) : isOwnProfile && (
+                                                <div className="flex items-center text-orange-400 opacity-70">
+                                                    <MapPin size={20} className="mr-2" />
+                                                    <p className="text-sm">Add your location</p>
+                                                </div>
+                                            )}
+                                            <p className="text-sm text-gray-400">
+                                                Joined {new Date(user.createdAt).toLocaleDateString("en-US", {
+                                                    month: "long",
+                                                    year: "numeric",
+                                                })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* <ProfileMenuButton
+                                    userSlug={user.slug}
+                                    userId={user.id}
+                                    userName={user.name}
+                                    isBlocked={!!isBlocked}
+                                /> */}
+                                <Link
+                                    href={`/messages/${user.slug}`}
+                                    className="ml-auto mr-1 text-gray-100 hover:text-orange-400 transition"
+                                    title="Send Direct Message"
+                                >
+                                    <MoreHorizontal size={35} />
+                                </Link>
                             </div>
 
-                            <p className="text-sm mt-3 text-gray-300">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eum aliquam harum, labore recusandae cupiditate repudiandae voluptas quaerat doloribus earum sequi! Dolorum hic praesentium magni officia repudiandae sapiente atque. Harum, voluptatum?
-                            </p>
+                            {user.bio ? (
+                                <p className="mt-3 text-gray-300 whitespace-pre-line">
+                                    {user.bio}
+                                </p>
+                            ) : isOwnProfile && (
+                                <p className="mt-3 text-gray-300 opacity-70">
+                                    Add a profile bio by clicking the edit button in the top-right corner
+                                </p>
+                            )}
+
+                            <div className="sm:hidden flex justify-between my-1 mt-3">
+                                {user.location ? (
+                                    <div className="flex items-center text-orange-400">
+                                        <MapPin size={20} className="mr-2" />
+                                        <p className="text-sm">{user.location}</p>
+                                    </div>
+                                ) : isOwnProfile && (
+                                    <div className="flex items-center text-orange-400 opacity-70">
+                                        <MapPin size={20} className="mr-2" />
+                                        <p className="text-sm">Add your location</p>
+                                    </div>
+                                )}
+                                <p className="text-sm  text-gray-400 ml-auto mr-1">
+                                    Joined {new Date(user.createdAt).toLocaleDateString("en-US", {
+                                        month: "long",
+                                        year: "numeric",
+                                    })}
+                                </p>
+                            </div>
                         </div>
                     </div>
+
 
 
                     {/* Toggle Item List */}
@@ -139,7 +198,7 @@ const UserPage = async ({ params }: Props) => {
 
 
                     <div className="space-y-2">
-                        {dummyComments.map((review, index) => (
+                        {dummyComments.map((review, index) => ( // bg-zinc-900 text-gray-200 shadow border border-gray-700 rounded-xl
                             <div key={index} className="border border-gray-700 rounded-xl p-4 bg-zinc-900 text-gray-200 shadow space-y-3">
                                 <div className="flex flex-col md:flex-row items-start justify-between mb-2 gap-2">
                                     <div className="flex items-center gap-3">
@@ -148,11 +207,9 @@ const UserPage = async ({ params }: Props) => {
                                     </div>
                                     <StarRating rating={review.rating} />
                                 </div>
-                                <Image
-                                    src="reports/garage_sale6_fxkgb9"
+                                <ClickableImage
+                                    src="https://res.cloudinary.com/dx83fnzoj/image/upload/v1748647101/reports/garage_sale6_fxkgb9.jpg"
                                     alt="Garage sale house"
-                                    width={600}
-                                    height={300}
                                     className="rounded-lg object-cover w-full"
                                 />
                                 <p className="text-sm text-gray-300">{review.comment}</p>

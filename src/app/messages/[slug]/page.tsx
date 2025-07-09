@@ -23,7 +23,12 @@ const MessagePage = async ({ params }: Props) => {
     const recipient = await prisma.user.findUnique({
         where: { slug },
     });
-    if (!recipient || recipient.id === sender.id) notFound();
+
+    if (!recipient) notFound();
+
+    if (recipient.id === sender.id) {
+        redirect(`/user/${recipient.slug}`);
+    }
 
     const isBlocked = await prisma.userBlock.findFirst({
         where: {

@@ -73,7 +73,7 @@ const ProfileMenuButton = ({
             <button
                 ref={buttonRef}
                 onClick={() => setIsOpen((prev) => !prev)}
-                className="ml-auto mr-1 text-gray-100 hover:text-orange-400 transition"
+                className="cursor-pointer mr-1 text-gray-100 hover:text-orange-400 transition"
                 aria-label="More options"
             >
                 <MoreHorizontal size={35} />
@@ -82,8 +82,15 @@ const ProfileMenuButton = ({
             {isOpen && (
                 <div
                     ref={menuRef}
-                    className="absolute top-12 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
+                    className="absolute w-44 top-8 right-0 z-20 border border-zinc-800 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
                 >
+                    <Link
+                        href={`/messages/${userSlug}`}
+                        title="Send Direct Message"
+                        className="hover:text-orange-400 text-left cursor-pointer"
+                    >
+                        Send Message
+                    </Link>
                     {isBlocked ? (
                         <button
                             onClick={() => {
@@ -103,13 +110,6 @@ const ProfileMenuButton = ({
                             Block User
                         </button>
                     )}
-                    <Link
-                        href={`/messages/${userSlug}`}
-                        title="Send Direct Message"
-                        className="hover:text-orange-400 text-left cursor-pointer"
-                    >
-                        Delete Conversation
-                    </Link>
                 </div>
             )}
 

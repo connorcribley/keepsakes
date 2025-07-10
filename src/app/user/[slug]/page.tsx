@@ -7,7 +7,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ProfileMenuButton from "@/components/profile/ProfileMenuButton";
-
+import EditProfileModal from "@/components/profile/EditProfileModal";
 import Link from "next/link";
 
 
@@ -112,19 +112,26 @@ const UserPage = async ({ params }: Props) => {
                                         </div>
                                     </div>
                                 </div>
-                                {/* <ProfileMenuButton
-                                    userSlug={user.slug}
-                                    userId={user.id}
-                                    userName={user.name}
-                                    isBlocked={!!isBlocked}
-                                /> */}
-                                <Link
-                                    href={`/messages/${user.slug}`}
-                                    className="ml-auto mr-1 text-gray-100 hover:text-orange-400 transition"
-                                    title="Send Direct Message"
-                                >
-                                    <MoreHorizontal size={35} />
-                                </Link>
+
+                                {isOwnProfile ? (
+                                    <EditProfileModal 
+                                        image={user.image || "/default-pfp.svg"}
+                                        name={user.name}
+                                        location={user.location || ""}
+                                        bio={user.bio || ""}
+                                    />
+                                ) : (
+                                    <div className="relative ml-auto">
+                                        <ProfileMenuButton
+                                            userSlug={user.slug}
+                                            userId={user.id}
+                                            userName={user.name}
+                                            isBlocked={!!isBlocked}
+                                        />
+                                    </div>
+                                )}
+
+
                             </div>
 
                             {user.bio ? (

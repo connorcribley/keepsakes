@@ -2,8 +2,8 @@
 
 import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
-import { SquarePen, X } from "lucide-react";
-import ClickableImage from "@/components/ClickableImage";
+import { SquarePen } from "lucide-react";
+import { updateUserProfile } from "@/app/actions/user"; // adjust path as needed
 
 interface EditProfileModalProps {
   image: string | null;
@@ -39,6 +39,21 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
     }
   };
 
+  const handleSubmit = async () => {
+    try {
+      await updateUserProfile({
+        name: form.name,
+        location: form.location || undefined,
+        bio: form.bio || undefined,
+        image: form.image || undefined,
+      });
+      setIsOpen(false);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      alert("Something went wrong. Please try again.");
+    }
+  }
+
   return (
     <>
       <button
@@ -50,15 +65,7 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
 
       {isOpen && createPortal(
         <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center px-4 sm:px-0">
-          <div className="relative bg-zinc-900 w-full sm:max-w-lg sm:rounded-xl max-h-[90vh] overflow-y-auto p-6 text-gray-100 flex flex-col">
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-red-400"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close"
-            >
-              <X size={28} />
-            </button>
-
+          <div className="bg-zinc-900 w-full sm:max-w-lg sm:rounded-xl max-h-[90vh] overflow-y-auto p-6 text-gray-100 flex flex-col">
             <h2 className="text-2xl font-semibold mb-4">Edit Profile</h2>
 
             <div className="flex flex-col gap-4">
@@ -120,18 +127,14 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
               {/* Buttons */}
               <div className="flex justify-end gap-3 mt-2">
                 <button
-                  className="px-4 py-2 rounded-md bg-zinc-700 text-gray-300 hover:bg-zinc-600"
+                  className="cursor-pointer px-4 py-2 rounded-md bg-zinc-700 text-gray-300 hover:bg-zinc-600"
                   onClick={() => setIsOpen(false)}
                 >
                   Cancel
                 </button>
                 <button
-                  className="px-4 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600"
-                  onClick={() => {
-                    // Submit logic goes here
-                    console.log("Form submitted:", form);
-                    setIsOpen(false);
-                  }}
+                  className="cursor-pointer px-4 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600"
+                  onClick={handleSubmit}
                 >
                   Save
                 </button>

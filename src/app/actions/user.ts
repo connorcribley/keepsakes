@@ -22,6 +22,10 @@ export async function updateUserProfile({
     throw new Error("Unauthorized");
   }
 
+  if (bio && bio.length > 1000) {
+    throw new Error("Bio must be 1000 characters or less");
+  }
+
   await prisma.user.update({
     where: { id: session.user.id },
     data: {

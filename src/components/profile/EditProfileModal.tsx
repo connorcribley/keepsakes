@@ -15,6 +15,8 @@ interface EditProfileModalProps {
 const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [error, setError] = useState("");
+
 
   const [form, setForm] = useState({
     image,
@@ -41,6 +43,7 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
 
   const handleSubmit = async () => {
     try {
+      setError(""); // clear previous error
       await updateUserProfile({
         name: form.name,
         location: form.location || undefined,
@@ -48,9 +51,9 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
         image: form.image || undefined,
       });
       setIsOpen(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to update profile:", err);
-      alert("Something went wrong. Please try again.");
+      setError(err.message || "Something went wrong.");
     }
   }
 
@@ -68,9 +71,9 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
           <div className="bg-zinc-900 w-full sm:max-w-lg sm:rounded-xl max-h-[90vh] overflow-y-auto p-6 text-gray-100 flex flex-col">
             <h2 className="text-2xl font-semibold mb-4">Edit Profile</h2>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col">
               {/* Profile Picture */}
-              <div className="relative w-30 h-30 mx-auto">
+              <div className="relative w-30 h-30 mx-auto mb-2">
                 <img
                   src={form.image || "/default-pfp.svg"}
                   alt="Profile"
@@ -96,33 +99,53 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
               </div>
 
               {/* Name */}
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Your name"
-                className="bg-zinc-800 rounded-md px-3 py-2 text-gray-100 placeholder-gray-400 border border-zinc-700 focus:outline-none focus:border-orange-400"
-              />
+              <div>
+                <label className="block text-sm text-gray-300 mb-1 ml-1">Display Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="Your name"
+                  className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+                <div className="text-sm text-gray-400 text-right">
+                  {form.name.length}/50
+                </div>
+              </div>
 
               {/* Location */}
-              <input
-                type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
-                placeholder="Your location"
-                className="bg-zinc-800 rounded-md px-3 py-2 text-gray-100 placeholder-gray-400 border border-zinc-700 focus:outline-none focus:border-orange-400"
-              />
+              <div>
+                <label className="block text-sm text-gray-300 mb-1 ml-1">Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={form.location}
+                  onChange={handleChange}
+                  placeholder="Your location"
+                  className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+                <div className="text-sm text-gray-400 text-right">
+                  {form.location.length}/100
+                </div>
+              </div>
 
               {/* Bio */}
-              <textarea
-                name="bio"
-                value={form.bio}
-                onChange={handleChange}
-                placeholder="Write something about yourself..."
-                className="bg-zinc-800 rounded-md px-3 py-2 text-gray-100 placeholder-gray-400 border border-zinc-700 focus:outline-none focus:border-orange-400 min-h-[100px]"
-              />
+              <div>
+                <label className="block text-sm text-gray-300 mb-1 ml-1">Profile Bio</label>
+                <textarea
+                  name="bio"
+                  value={form.bio}
+                  onChange={handleChange}
+                  placeholder="Write something about yourself..."
+                  className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 min-h-[100px]"
+                />
+                <div className="text-sm text-gray-400 text-right">
+                  {form.bio.length}/1000
+                </div>
+              </div>
+
+              {error && <p className="text-red-500 text-sm text-center mb-1">{error}</p>}
 
               {/* Buttons */}
               <div className="flex justify-end gap-3 mt-2">

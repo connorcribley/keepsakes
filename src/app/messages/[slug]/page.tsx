@@ -64,7 +64,7 @@ const MessagePage = async ({ params }: Props) => {
             conversationId={conversation?.id ?? null}
             recipientId={recipient.id}
             recipientName={recipient.name}
-            recipientImage={recipient.image || "/default-avatar.png"}
+            recipientImage={recipient.image || "/default-pfp.svg"}
             recipientSlug={recipient.slug}
             isBlocked={!!isBlocked}
         />

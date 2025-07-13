@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { SquarePen } from "lucide-react";
 import { updateUserProfile } from "@/app/actions/user"; // adjust path as needed
+import ImageCropModal from "./ImageCropModal";
 
 interface EditProfileModalProps {
   image: string | null;
@@ -14,9 +15,10 @@ interface EditProfileModalProps {
 
 const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [error, setError] = useState("");
-
 
   const [form, setForm] = useState({
     image,
@@ -25,20 +27,89 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
     bio: bio || "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  // Image validation constants
+  const ACCEPTED_IMAGE_TYPES = ["jpg", "jpeg", "png", "webp", "gif"];
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+
+  const validateImageFile = (file: File): { isValid: boolean; error?: string } => {
+    // Check file type
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExtension || !ACCEPTED_IMAGE_TYPES.includes(fileExtension)) {
+      return {
+        isValid: false,
+        error: `Invalid file type. Please select a ${ACCEPTED_IMAGE_TYPES.join(', ')} file.`
+      };
+    }
+
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      return {
+        isValid: false,
+        error: "File size must be under 5MB."
+      };
+    }
+
+    return { isValid: true };
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const checkImageAspectRatio = (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const aspectRatio = img.width / img.height;
+        const isSquare = Math.abs(aspectRatio - 1) < 0.1; // Allow small tolerance
+        resolve(isSquare);
+      };
+      img.onerror = () => resolve(false);
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    // Clear previous errors
+    setError("");
+
+    // Validate file type and size
+    const validation = validateImageFile(file);
+    if (!validation.isValid) {
+      setError(validation.error!);
+      return;
+    }
+
+    // Check aspect ratio
+    const isSquare = await checkImageAspectRatio(file);
+    
+    if (isSquare) {
+      // Image is already 1:1, set it directly
       const reader = new FileReader();
       reader.onloadend = () => {
         setForm((prev) => ({ ...prev, image: reader.result as string }));
       };
       reader.readAsDataURL(file);
+    } else {
+      // Image needs cropping, open crop modal
+      setSelectedImageFile(file);
+      setIsCropModalOpen(true);
     }
+  };
+
+  const handleCropComplete = (croppedImageDataUrl: string) => {
+    setForm((prev) => ({ ...prev, image: croppedImageDataUrl }));
+    setIsCropModalOpen(false);
+    setSelectedImageFile(null);
+  };
+
+  const handleCropCancel = () => {
+    setIsCropModalOpen(false);
+    setSelectedImageFile(null);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
@@ -166,6 +237,15 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Image Crop Modal */}
+      {isCropModalOpen && selectedImageFile && (
+        <ImageCropModal
+          imageFile={selectedImageFile}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
       )}
     </>
   );

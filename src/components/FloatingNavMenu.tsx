@@ -30,17 +30,13 @@ const FloatingNavMenu = ({ isLoggedIn, userSlug, userImage, logoutButton }: Prop
     if (isLoggedIn && userSlug) return (
         <div className="relative" ref={menuRef}>
             <button onClick={() => setIsOpen(!isOpen)} aria-label="Toggle user menu" className='flex items-center justify-center'>
-                {userImage ? (
+                <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer flex-shrink-0">
                     <img
-                        src={userImage}
+                        src={userImage || '/default-pfp.svg'}
                         alt="Profile Picture"
-                        width={40}
-                        height={40}
-                        className="cursor-pointer rounded-full border-2 border-gray-100 hover:border-orange-400 transition"
+                        className="rounded-full w-full h-full object-cover border-2 border-gray-100 hover:border-orange-500"
                     />
-                ) : (
-                    <UserCircle2 size={40} />
-                )}
+                </div>
             </button>
 
             {isOpen && (

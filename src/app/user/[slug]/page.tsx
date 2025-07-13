@@ -115,7 +115,7 @@ const UserPage = async ({ params }: Props) => {
 
                                 {isOwnProfile ? (
                                     <EditProfileModal 
-                                        image={user.image || "/default-pfp.svg"}
+                                        image={user.image}
                                         name={user.name}
                                         location={user.location || ""}
                                         bio={user.bio || ""}

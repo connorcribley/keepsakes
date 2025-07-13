@@ -62,7 +62,6 @@ export async function POST(req: Request) {
                 email: validatedData.email,
                 password: hashedPassword,
                 slug,
-                image: 'https://res.cloudinary.com/dx83fnzoj/image/upload/v1750111768/user_profiles/default-pfp_wm30df.svg',
                 emailVerified: null,
                 verificationCode,
                 codeExpiresAt: new Date(Date.now() + 10 * 60 * 1000),  // Set 10-minute code expiry

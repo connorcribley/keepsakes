@@ -20,7 +20,7 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [cropArea, setCropArea] = useState<CropArea>({ x: 50, y: 50, size: 200 });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragType, setDragType] = useState<'move' | 'resize' | null>(null);
+  const [dragType, setDragType] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageData, setImageData] = useState<ImageData | null>(null);
@@ -78,7 +78,7 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
     ctx.putImageData(imageData, 0, 0);
 
     // Draw semi-transparent overlay
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Clear crop area
@@ -92,12 +92,12 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
     ctx.strokeRect(cropArea.x, cropArea.y, cropArea.size, cropArea.size);
 
     // Draw corner handles
-    const handleSize = 8;
+    const handleSize = 12;
     ctx.fillStyle = '#f97316';
-    ctx.fillRect(cropArea.x - handleSize/2, cropArea.y - handleSize/2, handleSize, handleSize);
-    ctx.fillRect(cropArea.x + cropArea.size - handleSize/2, cropArea.y - handleSize/2, handleSize, handleSize);
-    ctx.fillRect(cropArea.x - handleSize/2, cropArea.y + cropArea.size - handleSize/2, handleSize, handleSize);
-    ctx.fillRect(cropArea.x + cropArea.size - handleSize/2, cropArea.y + cropArea.size - handleSize/2, handleSize, handleSize);
+    ctx.fillRect(cropArea.x - handleSize / 2, cropArea.y - handleSize / 2, handleSize, handleSize);
+    ctx.fillRect(cropArea.x + cropArea.size - handleSize / 2, cropArea.y - handleSize / 2, handleSize, handleSize);
+    ctx.fillRect(cropArea.x - handleSize / 2, cropArea.y + cropArea.size - handleSize / 2, handleSize, handleSize);
+    ctx.fillRect(cropArea.x + cropArea.size - handleSize / 2, cropArea.y + cropArea.size - handleSize / 2, handleSize, handleSize);
   }, [imageData, cropArea]);
 
   // Redraw canvas when crop area changes
@@ -122,32 +122,39 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
     };
   };
 
-  const isInCorner = (x: number, y: number) => {
-    const handleSize = 8;
-    const corners = [
-      { x: cropArea.x - handleSize/2, y: cropArea.y - handleSize/2 },
-      { x: cropArea.x + cropArea.size - handleSize/2, y: cropArea.y - handleSize/2 },
-      { x: cropArea.x - handleSize/2, y: cropArea.y + cropArea.size - handleSize/2 },
-      { x: cropArea.x + cropArea.size - handleSize/2, y: cropArea.y + cropArea.size - handleSize/2 }
-    ];
+  const getCorner = (x: number, y: number): string | null => {
+    const handleSize = 12;
+    const corners = {
+      'top-left': { x: cropArea.x - handleSize / 2, y: cropArea.y - handleSize / 2 },
+      'top-right': { x: cropArea.x + cropArea.size - handleSize / 2, y: cropArea.y - handleSize / 2 },
+      'bottom-left': { x: cropArea.x - handleSize / 2, y: cropArea.y + cropArea.size - handleSize / 2 },
+      'bottom-right': { x: cropArea.x + cropArea.size - handleSize / 2, y: cropArea.y + cropArea.size - handleSize / 2 },
+    };
 
-    return corners.some(corner => 
-      x >= corner.x && x <= corner.x + handleSize && 
-      y >= corner.y && y <= corner.y + handleSize
-    );
+    for (const [cornerName, cornerPos] of Object.entries(corners)) {
+      if (
+        x >= cornerPos.x && x <= cornerPos.x + handleSize &&
+        y >= cornerPos.y && y <= cornerPos.y + handleSize
+      ) {
+        return cornerName;
+      }
+    }
+
+    return null;
   };
 
   const isInCropArea = (x: number, y: number) => {
     return x >= cropArea.x && x <= cropArea.x + cropArea.size &&
-           y >= cropArea.y && y <= cropArea.y + cropArea.size;
+      y >= cropArea.y && y <= cropArea.y + cropArea.size;
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     const coords = getEventCoordinates(e);
-    
-    if (isInCorner(coords.x, coords.y)) {
-      setDragType('resize');
+
+    const corner = getCorner(coords.x, coords.y);
+    if (corner) {
+      setDragType(corner); // e.g., 'top-left', 'bottom-right'
     } else if (isInCropArea(coords.x, coords.y)) {
       setDragType('move');
     } else {
@@ -161,9 +168,10 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
   const handleTouchStart = (e: React.TouchEvent) => {
     e.preventDefault();
     const coords = getEventCoordinates(e);
-    
-    if (isInCorner(coords.x, coords.y)) {
-      setDragType('resize');
+
+    const corner = getCorner(coords.x, coords.y);
+    if (corner) {
+      setDragType(corner); // e.g., 'top-left', 'bottom-right'
     } else if (isInCropArea(coords.x, coords.y)) {
       setDragType('move');
     } else {
@@ -177,7 +185,7 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
     e.preventDefault();
-    
+
     const coords = getEventCoordinates(e);
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -186,24 +194,56 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
       const newX = Math.max(0, Math.min(canvas.width - cropArea.size, coords.x - dragStart.x));
       const newY = Math.max(0, Math.min(canvas.height - cropArea.size, coords.y - dragStart.y));
       setCropArea(prev => ({ ...prev, x: newX, y: newY }));
-    } else if (dragType === 'resize') {
-      const deltaX = coords.x - (cropArea.x + cropArea.size);
-      const deltaY = coords.y - (cropArea.y + cropArea.size);
-      const delta = Math.max(deltaX, deltaY);
-      
-      const newSize = Math.max(50, Math.min(
-        Math.min(canvas.width - cropArea.x, canvas.height - cropArea.y),
-        cropArea.size + delta
-      ));
-      
-      setCropArea(prev => ({ ...prev, size: newSize }));
+    } else if (
+      dragType === 'top-left' ||
+      dragType === 'top-right' ||
+      dragType === 'bottom-left' ||
+      dragType === 'bottom-right'
+    ) {
+      let newX = cropArea.x;
+      let newY = cropArea.y;
+      let newSize = cropArea.size;
+
+      if (dragType === 'bottom-right') {
+        const delta = Math.max(coords.x - cropArea.x, coords.y - cropArea.y);
+        newSize = Math.max(50, Math.min(
+          Math.min(canvas.width - cropArea.x, canvas.height - cropArea.y),
+          delta
+        ));
+      }
+
+      else if (dragType === 'top-left') {
+        const delta = Math.max(cropArea.x + cropArea.size - coords.x, cropArea.y + cropArea.size - coords.y);
+        newSize = Math.max(50, Math.min(delta, cropArea.x + cropArea.size, cropArea.y + cropArea.size));
+        newX = cropArea.x + cropArea.size - newSize;
+        newY = cropArea.y + cropArea.size - newSize;
+      }
+
+      else if (dragType === 'top-right') {
+        const delta = Math.max(coords.x - cropArea.x, cropArea.y + cropArea.size - coords.y);
+        newSize = Math.max(50, Math.min(delta, canvas.width - cropArea.x, cropArea.y + cropArea.size));
+        newY = cropArea.y + cropArea.size - newSize;
+      }
+
+      else if (dragType === 'bottom-left') {
+        const delta = Math.max(cropArea.x + cropArea.size - coords.x, coords.y - cropArea.y);
+        newSize = Math.max(50, Math.min(delta, cropArea.x + cropArea.size, canvas.height - cropArea.y));
+        newX = cropArea.x + cropArea.size - newSize;
+      }
+
+      // Clamp if necessary
+      newX = Math.max(0, Math.min(canvas.width - newSize, newX));
+      newY = Math.max(0, Math.min(canvas.height - newSize, newY));
+
+      setCropArea({ x: newX, y: newY, size: newSize });
     }
+
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
     e.preventDefault();
-    
+
     const coords = getEventCoordinates(e);
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -216,12 +256,12 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
       const deltaX = coords.x - (cropArea.x + cropArea.size);
       const deltaY = coords.y - (cropArea.y + cropArea.size);
       const delta = Math.max(deltaX, deltaY);
-      
+
       const newSize = Math.max(50, Math.min(
         Math.min(canvas.width - cropArea.x, canvas.height - cropArea.y),
         cropArea.size + delta
       ));
-      
+
       setCropArea(prev => ({ ...prev, size: newSize }));
     }
   };
@@ -273,13 +313,13 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
             <X size={24} />
           </button>
         </div>
-        
+
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="text-center space-y-4">
             <p className="text-sm text-gray-400">
               Selected file: {imageFile.name}
             </p>
-            
+
             {/* Crop Canvas */}
             <div className="flex justify-center">
               <canvas
@@ -295,11 +335,11 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
                 style={{ touchAction: 'none' }}
               />
             </div>
-            
+
             <p className="text-sm text-gray-400">
               Drag the orange square to move it, drag corners to resize
             </p>
-            
+
             <div className="flex gap-3 justify-center">
               <button
                 onClick={onCancel}

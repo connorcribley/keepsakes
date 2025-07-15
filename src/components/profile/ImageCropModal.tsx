@@ -74,31 +74,55 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw image
+    // Draw the image first
     ctx.putImageData(imageData, 0, 0);
 
-    // Draw semi-transparent overlay
-    ctx.fillStyle = 'rgba(0, 0, 0, 0)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // --- DRAW semi-transparent overlay with cut-out crop area ---
+    ctx.save();
 
-    // Clear crop area
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillRect(cropArea.x, cropArea.y, cropArea.size, cropArea.size);
-    ctx.globalCompositeOperation = 'source-over';
+    // Create a path that covers everything
+    ctx.beginPath();
+    ctx.rect(0, 0, canvas.width, canvas.height);
 
-    // Draw crop border
-    ctx.strokeStyle = '#f97316'; // orange-500
-    ctx.lineWidth = 2;
+    // Subtract the crop area from the path
+    ctx.moveTo(cropArea.x, cropArea.y);
+    ctx.rect(cropArea.x, cropArea.y, cropArea.size, cropArea.size);
+
+    // Use even-odd fill rule to cut out the crop square
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fill('evenodd');
+
+    ctx.restore();
+
+    // --- DRAW black border behind orange crop border ---
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#111';
     ctx.strokeRect(cropArea.x, cropArea.y, cropArea.size, cropArea.size);
 
-    // Draw corner handles
-    const handleSize = 12;
+    // Then draw orange border on top
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#f97316'; // orange-500
+    ctx.strokeRect(cropArea.x, cropArea.y, cropArea.size, cropArea.size);
+
+    // --- DRAW circular corner handles with black border ---
+    const handleRadius = 10;
     ctx.fillStyle = '#f97316';
-    ctx.fillRect(cropArea.x - handleSize / 2, cropArea.y - handleSize / 2, handleSize, handleSize);
-    ctx.fillRect(cropArea.x + cropArea.size - handleSize / 2, cropArea.y - handleSize / 2, handleSize, handleSize);
-    ctx.fillRect(cropArea.x - handleSize / 2, cropArea.y + cropArea.size - handleSize / 2, handleSize, handleSize);
-    ctx.fillRect(cropArea.x + cropArea.size - handleSize / 2, cropArea.y + cropArea.size - handleSize / 2, handleSize, handleSize);
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 2;
+
+    const drawCircle = (cx: number, cy: number) => {
+      ctx.beginPath();
+      ctx.arc(cx, cy, handleRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    };
+
+    drawCircle(cropArea.x, cropArea.y); // top-left
+    drawCircle(cropArea.x + cropArea.size, cropArea.y); // top-right
+    drawCircle(cropArea.x, cropArea.y + cropArea.size); // bottom-left
+    drawCircle(cropArea.x + cropArea.size, cropArea.y + cropArea.size); // bottom-right
   }, [imageData, cropArea]);
+
 
   // Redraw canvas when crop area changes
   useEffect(() => {
@@ -111,19 +135,24 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
   const getEventCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
-
+  
     const rect = canvas.getBoundingClientRect();
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-
+  
+    // Compute scale between CSS pixels and canvas pixels
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+  
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
     };
   };
+  
 
   const getCorner = (x: number, y: number): string | null => {
-    const handleSize = 12;
+    const handleSize = 10;
     const corners = {
       'top-left': { x: cropArea.x - handleSize / 2, y: cropArea.y - handleSize / 2 },
       'top-right': { x: cropArea.x + cropArea.size - handleSize / 2, y: cropArea.y - handleSize / 2 },
@@ -278,40 +307,47 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
 
   const handleApplyCrop = () => {
     const canvas = canvasRef.current;
-    if (!canvas || !imageData) return;
+    if (!canvas) return;
 
-    // Create a new canvas for the cropped image
-    const cropCanvas = document.createElement('canvas');
-    const cropCtx = cropCanvas.getContext('2d');
-    if (!cropCtx) return;
+    const img = new Image();
+    img.onload = () => {
+      const exportSize = 512; // Or 1024 for HD export
+      const offscreenCanvas = document.createElement('canvas');
+      const offscreenCtx = offscreenCanvas.getContext('2d');
+      if (!offscreenCtx) return;
 
-    // Set crop canvas size to the crop area size
-    cropCanvas.width = cropArea.size;
-    cropCanvas.height = cropArea.size;
+      offscreenCanvas.width = exportSize;
+      offscreenCanvas.height = exportSize;
 
-    // Draw the cropped portion
-    cropCtx.drawImage(
-      canvas,
-      cropArea.x, cropArea.y, cropArea.size, cropArea.size,
-      0, 0, cropArea.size, cropArea.size
-    );
+      // Calculate scale between original image and visible canvas
+      const scaleX = img.width / canvas.width;
+      const scaleY = img.height / canvas.height;
 
-    // Convert to data URL
-    const croppedImageDataUrl = cropCanvas.toDataURL('image/jpeg', 0.9);
-    onCropComplete(croppedImageDataUrl);
+      // Scale crop area back to original image dimensions
+      const sx = cropArea.x * scaleX;
+      const sy = cropArea.y * scaleY;
+      const sSize = cropArea.size * scaleX; // Assume scaleX ≈ scaleY for 1:1
+
+      // Draw cropped area from original image, scaled to export size
+      offscreenCtx.drawImage(
+        img,
+        sx, sy, sSize, sSize,
+        0, 0, exportSize, exportSize
+      );
+
+      const croppedImageDataUrl = offscreenCanvas.toDataURL('image/jpeg', 0.9);
+      onCropComplete(croppedImageDataUrl);
+    };
+
+    // Load from original file
+    img.src = URL.createObjectURL(imageFile);
   };
 
   return createPortal(
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center px-4 sm:px-0">
       <div className="bg-zinc-900 w-full sm:max-w-2xl sm:rounded-xl max-h-[90vh] overflow-y-auto p-6 text-gray-100 flex flex-col">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-center items-center mb-4">
           <h2 className="text-2xl font-semibold">Crop Image</h2>
-          <button
-            onClick={onCancel}
-            className="text-gray-400 hover:text-white transition"
-          >
-            <X size={24} />
-          </button>
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center">
@@ -321,10 +357,10 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
             </p>
 
             {/* Crop Canvas */}
-            <div className="flex justify-center">
+            <div className="flex justify-center w-full overflow-x-auto">
               <canvas
                 ref={canvasRef}
-                className="border border-gray-600 rounded-lg cursor-crosshair"
+                className="max-w-full h-auto border border-gray-600 rounded-lg cursor-crosshair"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -343,13 +379,13 @@ const ImageCropModal = ({ imageFile, onCropComplete, onCancel }: ImageCropModalP
             <div className="flex gap-3 justify-center">
               <button
                 onClick={onCancel}
-                className="px-4 py-2 rounded-md bg-zinc-700 text-gray-300 hover:bg-zinc-600"
+                className="cursor-pointer px-4 py-2 rounded-md bg-zinc-700 text-gray-300 hover:bg-zinc-600"
               >
                 Cancel
               </button>
               <button
                 onClick={handleApplyCrop}
-                className="px-4 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600"
+                className="cursor-pointer px-4 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600"
               >
                 Apply Crop
               </button>

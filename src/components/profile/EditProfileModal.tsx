@@ -14,6 +14,9 @@ interface EditProfileModalProps {
 }
 
 const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps) => {
+  const MAX_NAME_LENGTH = 50;
+  const MAX_LOCATION_LENGTH = 100;
+  const MAX_BIO_LENGTH = 1000;
   const [isOpen, setIsOpen] = useState(false);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -26,6 +29,12 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
     location: location || "",
     bio: bio || "",
   });
+
+  const isNameTooLong = form.name.length > MAX_NAME_LENGTH;
+  const isLocationTooLong = form.location.length > MAX_LOCATION_LENGTH;
+  const isBioTooLong = form.bio.length > MAX_BIO_LENGTH;
+
+  const isFormValid = !isNameTooLong && !isLocationTooLong && !isBioTooLong;
 
   // Image validation constants
   const ACCEPTED_IMAGE_TYPES = ["jpg", "jpeg", "png", "webp", "gif"];
@@ -81,7 +90,7 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
 
     // Check aspect ratio
     const isSquare = await checkImageAspectRatio(file);
-    
+
     if (isSquare) {
       // Image is already 1:1, set it directly
       const reader = new FileReader();
@@ -180,8 +189,9 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
                   placeholder="Your name"
                   className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
-                <div className="text-sm text-gray-400 text-right">
-                  {form.name.length}/50
+                <div className="text-sm text-right">
+                  <span className={`${isNameTooLong ? 'text-red-500' : 'text-gray-400'}`}>{form.name.length}</span>
+                  <span className="text-gray-400">/{MAX_NAME_LENGTH}</span>
                 </div>
               </div>
 
@@ -196,8 +206,9 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
                   placeholder="Your location"
                   className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
-                <div className="text-sm text-gray-400 text-right">
-                  {form.location.length}/100
+                <div className="text-sm text-right">
+                  <span className={`${isLocationTooLong ? 'text-red-500' : 'text-gray-400'}`}>{form.location.length}</span>
+                  <span className="text-gray-400">/{MAX_LOCATION_LENGTH}</span>
                 </div>
               </div>
 
@@ -211,8 +222,9 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
                   placeholder="Write something about yourself..."
                   className="w-full bg-zinc-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 min-h-[100px]"
                 />
-                <div className="text-sm text-gray-400 text-right">
-                  {form.bio.length}/1000
+                <div className="text-sm text-right">
+                  <span className={`${isBioTooLong ? 'text-red-500' : 'text-gray-400'}`}>{form.bio.length}</span>
+                  <span className="text-gray-400">/{MAX_BIO_LENGTH}</span>
                 </div>
               </div>
 
@@ -227,8 +239,12 @@ const EditProfileModal = ({ image, name, location, bio }: EditProfileModalProps)
                   Cancel
                 </button>
                 <button
-                  className="cursor-pointer px-4 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600"
+                  className={`px-4 py-2 rounded-md text-white transition ${isFormValid
+                      ? 'cursor-pointer bg-orange-500 hover:bg-orange-600'
+                      : 'bg-zinc-700 opacity-50 cursor-not-allowed'
+                    }`}
                   onClick={handleSubmit}
+                  disabled={!isFormValid}
                 >
                   Save
                 </button>

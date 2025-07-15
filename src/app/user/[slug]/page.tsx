@@ -112,24 +112,25 @@ const UserPage = async ({ params }: Props) => {
                                         </div>
                                     </div>
                                 </div>
-
-                                {isOwnProfile ? (
-                                    <EditProfileModal 
-                                        image={user.image}
-                                        name={user.name}
-                                        location={user.location || ""}
-                                        bio={user.bio || ""}
-                                    />
-                                ) : (
-                                    <div className="relative ml-auto">
-                                        <ProfileMenuButton
-                                            userSlug={user.slug}
-                                            userId={user.id}
-                                            userName={user.name}
-                                            isBlocked={!!isBlocked}
+                                {session?.user?.id &&
+                                    (isOwnProfile ? (
+                                        <EditProfileModal
+                                            image={user.image}
+                                            name={user.name}
+                                            location={user.location || ""}
+                                            bio={user.bio || ""}
                                         />
-                                    </div>
-                                )}
+                                    ) : (
+                                        <div className="relative ml-auto">
+                                            <ProfileMenuButton
+                                                userSlug={user.slug}
+                                                userId={user.id}
+                                                userName={user.name}
+                                                isBlocked={!!isBlocked}
+                                            />
+                                        </div>
+                                    ))
+                                }
 
 
                             </div>

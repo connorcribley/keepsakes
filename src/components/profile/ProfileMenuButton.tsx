@@ -6,18 +6,18 @@ import WarningModal from "../floating/WarningModal";
 import { blockUser, unblockUser } from "@/app/actions/block";
 import Link from "next/link";
 
+import { useProfileBlock } from "@/context/ProfileBlockContext";
+
 interface ProfileMenuButtonProps {
     userSlug: string | null;
     userId: string;
     userName: string | null;
-    isBlocked: boolean;
 }
 
 const ProfileMenuButton = ({
     userSlug,
     userId,
     userName,
-    isBlocked,
 }: ProfileMenuButtonProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -25,13 +25,16 @@ const ProfileMenuButton = ({
     const [showBlockModal, setShowBlockModal] = useState(false);
     const [showUnblockModal, setShowUnblockModal] = useState(false);
 
+    const { hasBlocked, setHasBlocked } = useProfileBlock();
+
+    const didBlock = hasBlocked;
+
     const handleBlock = async () => {
         if (!userId) return alert("Could not find user");
-
         try {
             await blockUser(userId);
-            alert("User has been blocked")
-            setShowBlockModal(false)
+            setHasBlocked(true); // you blocked them
+            setShowBlockModal(false);
         } catch (err) {
             console.error("Block failed:", err);
             alert("Failed to block user.");
@@ -41,11 +44,10 @@ const ProfileMenuButton = ({
 
     const handleUnblock = async () => {
         if (!userId) return alert("Could not find user");
-
         try {
             await unblockUser(userId);
-            alert("User has been unblocked")
-            setShowUnblockModal(false)
+            setHasBlocked(false);
+            setShowUnblockModal(false);
         } catch (err) {
             console.error("Unblock failed:", err);
             alert("Failed to unblock user.");
@@ -91,7 +93,7 @@ const ProfileMenuButton = ({
                     >
                         Send Message
                     </Link>
-                    {isBlocked ? (
+                    {didBlock ? (
                         <button
                             onClick={() => {
                                 setShowUnblockModal(true)
@@ -116,17 +118,17 @@ const ProfileMenuButton = ({
 
             {/* Block/Unblock User */}
             <WarningModal
-                isOpen={isBlocked ? showUnblockModal : showBlockModal}
-                onClose={() => { isBlocked ? setShowUnblockModal(false) : setShowBlockModal(false) }}
-                onConfirm={async () => { isBlocked ? handleUnblock() : handleBlock() }}
-                title={isBlocked ? "Unblock User" : "Block User"}
+                isOpen={hasBlocked ? showUnblockModal : showBlockModal}
+                onClose={() => { hasBlocked ? setShowUnblockModal(false) : setShowBlockModal(false) }}
+                onConfirm={async () => { hasBlocked ? handleUnblock() : handleBlock() }}
+                title={hasBlocked ? "Unblock User" : "Block User"}
                 content={
-                    isBlocked ?
+                    hasBlocked ?
                         `Do you really want to unblock ${userName ?? "this user"}?`
                         : `Do you really want to block ${userName ?? "this user"}?`
                 }
                 closeText="Cancel"
-                confirmText={isBlocked ? "Unblock" : "Block"}
+                confirmText={hasBlocked ? "Unblock" : "Block"}
             />
         </>
     )

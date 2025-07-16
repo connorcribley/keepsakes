@@ -30,7 +30,7 @@ const MessagePage = async ({ params }: Props) => {
         redirect(`/user/${recipient.slug}`);
     }
 
-    const isBlocked = await prisma.userBlock.findFirst({
+    const blockRecord = await prisma.userBlock.findFirst({
         where: {
             OR: [
                 { blockerId: sender.id, blockedId: recipient.id },
@@ -38,6 +38,10 @@ const MessagePage = async ({ params }: Props) => {
             ],
         },
     });
+    
+    const isBlocked = !!blockRecord && blockRecord.blockedId === sender.id;
+    const hasBlocked = !!blockRecord && blockRecord.blockerId === sender.id;
+    
 
     const conversation = await prisma.conversation.findFirst({
         where: {

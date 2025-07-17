@@ -11,7 +11,7 @@ interface MessageMenuButtonProps {
     conversationId: string | null;
     recipientId: string;
     recipientName: string | null;
-    isBlocked: boolean;
+    hasBlocked: boolean;
     onBlockChange: (blocked: boolean) => void;
 }
 
@@ -19,7 +19,7 @@ const MessageMenuButton = ({
     conversationId, 
     recipientId, 
     recipientName, 
-    isBlocked,
+    hasBlocked,
     onBlockChange 
 }: MessageMenuButtonProps) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -89,7 +89,7 @@ const MessageMenuButton = ({
                     ref={menuRef}
                     className="absolute top-12 right-2 z-20 bg-zinc-900 text-white text-lg rounded-lg shadow-lg py-3 px-4 flex flex-col space-y-1"
                 >
-                    {isBlocked ? (
+                    {hasBlocked ? (
                         <button
                             onClick={() => {
                                 setShowUnblockModal(true)
@@ -122,17 +122,17 @@ const MessageMenuButton = ({
             
             {/* Block/Unblock User */}
             <WarningModal
-                isOpen={isBlocked ? showUnblockModal : showBlockModal}
-                onClose={() => { isBlocked ? setShowUnblockModal(false) : setShowBlockModal(false) }}
-                onConfirm={async () => { isBlocked ? handleUnblock() : handleBlock() }}
-                title={isBlocked ? "Unblock User" : "Block User"}
+                isOpen={hasBlocked ? showUnblockModal : showBlockModal}
+                onClose={() => { hasBlocked ? setShowUnblockModal(false) : setShowBlockModal(false) }}
+                onConfirm={async () => { hasBlocked ? handleUnblock() : handleBlock() }}
+                title={hasBlocked ? "Unblock User" : "Block User"}
                 content={
-                    isBlocked ?
+                    hasBlocked ?
                         `Do you really want to unblock ${recipientName ?? "this user"}?`
                         : `Do you really want to block ${recipientName ?? "this user"}?`
                 }
                 closeText="Cancel"
-                confirmText={isBlocked ? "Unblock" : "Block"}
+                confirmText={hasBlocked ? "Unblock" : "Block"}
             />
             {/* Delete Conversation */}
             <WarningModal

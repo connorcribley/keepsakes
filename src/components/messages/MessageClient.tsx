@@ -20,6 +20,7 @@ interface MessageClientProps {
     recipientImage: string | null;
     recipientSlug: string | null;
     isBlocked: boolean;
+    initialHasBlocked: boolean;
 }
 
 const MAX_MESSAGE_LENGTH = 1000;
@@ -36,7 +37,8 @@ const MessageClient = ({
     recipientName,
     recipientImage,
     recipientSlug,
-    isBlocked
+    isBlocked,
+    initialHasBlocked
 }: MessageClientProps) => {
     const [newMessage, setNewMessage] = useState("");
     const [messageList, setMessageList] = useState(messages);
@@ -44,7 +46,7 @@ const MessageClient = ({
     const [editId, setEditId] = useState<string | null>(null);
     const [showCancelEditModal, setShowCancelEditModal] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-    const [blocked, setBlocked] = useState(isBlocked);
+    const [hasBlocked, setHasBlocked] = useState(initialHasBlocked);
 
 
     const [attachments, setAttachments] = useState<File[]>([]);
@@ -215,8 +217,8 @@ const MessageClient = ({
                         conversationId={conversationId ?? null}
                         recipientId={recipientId}
                         recipientName={recipientName}
-                        isBlocked={blocked}
-                        onBlockChange={setBlocked}
+                        hasBlocked={hasBlocked}
+                        onBlockChange={setHasBlocked}
                     />
                 </div>
 
@@ -259,7 +261,7 @@ const MessageClient = ({
                                             id={msg.id}
                                             content={msg.content ?? ""}
                                             isSender={msg.senderId === userId}
-                                            isBlocked={blocked}
+                                            isBlocked={isBlocked}
                                             createdAt={msg.createdAt}
                                             updatedAt={msg.updatedAt}
                                             attachmentUrls={msg.attachmentUrls}
@@ -276,7 +278,7 @@ const MessageClient = ({
 
                         {/* Input Fixed at Bottom */}
                         <div className="p-2 border-t border-zinc-800 bg-zinc-900">
-                            {blocked ? (
+                            {isBlocked || hasBlocked ? (
                                 <h2 className="text-center text-gray-400 text-lg my-1">
                                     You are not allowed to send messages to this user.
                                 </h2>

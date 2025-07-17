@@ -43,11 +43,15 @@ const UserPage = async ({ params }: Props) => {
 
     const isBlocked = isOwnProfile ? null : await prisma.userBlock.findFirst({
         where: {
-            OR: [
-                { blockerId: session?.user?.id, blockedId: user.id },
-                { blockerId: user.id, blockedId: session?.user?.id },
-            ],
-        },
+            blockerId: user.id,
+            blockedId: session?.user?.id
+        }
+    });
+    const hasBlocked = isOwnProfile ? null : await prisma.userBlock.findFirst({
+        where: {
+            blockerId: session?.user?.id,
+            blockedId: user.id
+        }
     });
 
 
@@ -72,8 +76,8 @@ const UserPage = async ({ params }: Props) => {
     return (
 
         <ProfileBlockProvider
-            initialIsBlocked={!isOwnProfile && !!isBlocked && isBlocked.blockedId === session?.user?.id}
-            initialHasBlocked={!isOwnProfile && !!isBlocked && isBlocked.blockerId === session?.user?.id}
+            initialIsBlocked={!!isBlocked}
+            initialHasBlocked={!!hasBlocked}
         >
             <div className="flex flex-col gap-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
                 <div className="flex flex-col lg:flex-row max-w-6xl w-full gap-6">

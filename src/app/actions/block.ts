@@ -25,7 +25,10 @@ export async function blockUser(blockedUserId: string) {
         },
     });
 
-    if (existing) return;
+    if (existing) {
+        console.log("Block already exists");
+        return;
+    };
 
     await prisma.userBlock.create({
         data: {
@@ -40,6 +43,7 @@ export async function unblockUser(unblockedUserId: string) {
     if (!session?.user) throw new Error("Unauthorized");
 
     const blockerId = session.user.id;
+    if (!blockerId) throw new Error("Unauthorized");
 
     if (blockerId === unblockedUserId) {
         throw new Error("You can't unblock yourself");
